@@ -32,11 +32,11 @@ struct ContentView: View {
 
 struct MainTabView: View {
     @State private var selection = 0
-    @EnvironmentObject var userData: UserData
+    @EnvironmentObject var userAuthManager: UserAuthenticationManager // Ensure you have access to this
     
     var body: some View {
         TabView(selection: $selection) {
-            HomeViewController()
+            HomeViewController(appState: $userAuthManager.appState) // Pass the appState here
                 .tabItem {
                     Label("Home", systemImage: "house")
                 }

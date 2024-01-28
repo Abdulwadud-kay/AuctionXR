@@ -47,11 +47,12 @@ struct LoginViewController: View {
                 .cornerRadius(8)
                 .padding(.horizontal)
 
-                NavigationLink(destination: RegisterViewController().environmentObject(userAuthManager.userData)) {
+                NavigationLink(destination: RegisterViewController(appState: $appState).environmentObject(userAuthManager)) {
                     Text("Don't have an account? Register here")
                         .foregroundColor(buttonColor)
                         .underline()
                 }
+
                 .padding()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -71,7 +72,7 @@ struct LoginViewController: View {
                         
                         // Set appState to initial to trigger PreviewView
                         userAuthManager.appState = .initial
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                             userAuthManager.checkUserLoggedIn() // This will set appState to .loggedIn
                         }
                     } else {

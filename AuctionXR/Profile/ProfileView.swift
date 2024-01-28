@@ -97,14 +97,15 @@ struct ProfileView: View {
             print("Error logging out: \(error.localizedDescription)")
         }
     }
-    
+}
     
     struct ProfileView_Previews: PreviewProvider {
         @State static var appState = AppState.loggedOut
         
         static var previews: some View {
             ProfileView(appState: $appState)
-                .environmentObject(UserData())
+                .environmentObject(UserData()) // <-- Make sure UserData conforms to ObservableObject
+                .environmentObject(UserAuthenticationManager()) // <-- Assuming you need to pass this too for the preview
         }
     }
-}
+

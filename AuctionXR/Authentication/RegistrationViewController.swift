@@ -4,6 +4,7 @@ import FirebaseFirestore
 
 struct RegisterViewController: View {
     @EnvironmentObject var userAuthManager: UserAuthenticationManager
+    @Binding var appState: AppState
     @State private var username: String = ""
     @State private var email: String = ""
     @State private var password: String = ""
@@ -22,26 +23,26 @@ struct RegisterViewController: View {
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding(.horizontal)
                     .autocapitalization(.none)
-
+                
                 // Email Input
                 TextField("Email", text: $email)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding(.horizontal)
                     .autocapitalization(.none)
                     .keyboardType(.emailAddress)
-
+                
                 // Password Input
                 SecureField("Password", text: $password)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding(.horizontal)
-
+                
                 // Error Message Display
                 if showError {
                     Text(errorMessage)
                         .foregroundColor(.red)
                         .padding()
                 }
-
+                
                 // Register Button
                 Button("Register") {
                     registerUser()
@@ -51,19 +52,25 @@ struct RegisterViewController: View {
                 .foregroundColor(.white)
                 .cornerRadius(8)
                 .padding(.horizontal)
-
+                
                 // Navigation to Login on Successful Registration
-                NavigationLink(destination: LoginViewController().environmentObject(userAuthManager), isActive: $isRegistrationSuccessful) {
-                    EmptyView()
+                NavigationLink(destination: LoginViewController(appState: $appState).environmentObject(userAuthManager)) {
+                    Text("Already have an account? Login")
+                        .foregroundColor(buttonColor)
+                        .underline()
                 }
-
+                
+                
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(backgroundColor)
             .edgesIgnoringSafeArea(.all)
         }
+        
     }
-
+    
+    // Registration Function
+    // Registration Function
     // Registration Function
     func registerUser() {
         Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
@@ -78,7 +85,13 @@ struct RegisterViewController: View {
                         self.errorMessage = error.localizedDescription
                     } else {
                         DispatchQueue.main.async {
-                            self.isRegistrationSuccessful = true
+                            // Set appState to initial to trigger the preview or a loading view
+                            userAuthManager.appState = .initial
+
+                            // Check user logged in after a short delay
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                userAuthManager.checkUserLoggedIn() // This should set appState to .loggedIn
+                            }
                         }
                     }
                 }
@@ -88,10 +101,11 @@ struct RegisterViewController: View {
             }
         }
     }
-}
 
-struct RegisterViewController_Previews: PreviewProvider {
-    static var previews: some View {
-        RegisterViewController().environmentObject(UserAuthenticationManager())
+    
+    struct RegisterViewController_Previews: PreviewProvider {
+        static var previews: some View {
+            RegisterViewController(appState: .constant(.initial)).environmentObject(UserAuthenticationManager())
+        }
     }
 }

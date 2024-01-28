@@ -7,7 +7,10 @@ struct HomeViewController: View {
     let headerFooterColor = Color(hex: "dbb88e")
     let centerColor = Color(hex: "f4e9dc")
     let tabTitles = ["All", "Art", "Science", "Collections", "Special"]
+    @Binding var appState: AppState
     @EnvironmentObject var userAuthManager: UserAuthenticationManager
+    
+    
     
     var body: some View {
         NavigationView {
@@ -31,8 +34,11 @@ struct HomeViewController: View {
                                     .foregroundColor(.white)
                             }
                             .sheet(isPresented: $isShowingProfileView) {
-                                ProfileView().environmentObject(userAuthManager)
+                                ProfileView(appState: $appState).environmentObject(userAuthManager)
                             }
+
+
+
                             .padding(.leading, 10)
 
 
@@ -106,9 +112,11 @@ struct HomeViewController: View {
 
 
 struct HomeViewController_Previews: PreviewProvider {
-    @State static var appState = AppState.loggedOut // Provide an initial appState
-
+    @State static var appState = AppState.initial // Define a State variable for appState
     static var previews: some View {
-        HomeViewController(appState: $appState).environmentObject(UserData())
+        HomeViewController(appState: $appState) // Pass the binding to appState
+            .environmentObject(UserAuthenticationManager())
     }
 }
+
+

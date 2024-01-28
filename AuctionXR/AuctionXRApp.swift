@@ -13,6 +13,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
 @main
 struct AuctionXApp: App {
+    @StateObject var userAuthManager = UserAuthenticationManager()
     @StateObject var userData = UserData()
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     init() {
@@ -34,6 +35,7 @@ struct AuctionXApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(userData)
+                .environmentObject(userAuthManager)
         }
     }
 }
