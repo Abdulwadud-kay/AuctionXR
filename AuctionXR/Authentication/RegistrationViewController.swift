@@ -70,8 +70,7 @@ struct RegisterViewController: View {
     }
     
     // Registration Function
-    // Registration Function
-    // Registration Function
+   
     func registerUser() {
         Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
             if let user = authResult?.user {
@@ -85,16 +84,11 @@ struct RegisterViewController: View {
                         self.errorMessage = error.localizedDescription
                     } else {
                         DispatchQueue.main.async {
-                            // Set appState to initial to trigger the preview or a loading view
-                            userAuthManager.appState = .initial
-
-                            // Check user logged in after a short delay
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                userAuthManager.checkUserLoggedIn() // This should set appState to .loggedIn
-                            }
+                            self.userAuthManager.appState = .loggedIn
                         }
                     }
                 }
+
             } else if let error = error {
                 self.showError = true
                 self.errorMessage = error.localizedDescription

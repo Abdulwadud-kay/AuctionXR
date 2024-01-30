@@ -61,6 +61,7 @@
 		14E3F7EB2B66CB1A00FCE5AF /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 14E3F7EA2B66CB1A00FCE5AF /* FirebaseRemoteConfig */; };
 		14E3F7ED2B66CB4200FCE5AF /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 14E3F7EC2B66CB4200FCE5AF /* GoogleService-Info.plist */; };
 		14E3F7F22B66F83200FCE5AF /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 14E3F7F12B66F83200FCE5AF /* FirebaseStorage */; };
+		14E3F7F42B68A5D700FCE5AF /* UserProfileEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14E3F7F32B68A5D700FCE5AF /* UserProfileEditView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -94,6 +95,7 @@
 		14E3F7B62B66C77B00FCE5AF /* PreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
 		14E3F7B92B66C7A600FCE5AF /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		14E3F7EC2B66CB4200FCE5AF /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		14E3F7F32B68A5D700FCE5AF /* UserProfileEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileEditView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -213,6 +215,7 @@
 				14E3F7B02B66C6D700FCE5AF /* HistoryView.swift */,
 				14E3F7B22B66C73500FCE5AF /* ProfileDetailView.swift */,
 				14E3F7B42B66C75900FCE5AF /* UserAuthenticationManager.swift */,
+				14E3F7F32B68A5D700FCE5AF /* UserProfileEditView.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -338,6 +341,7 @@
 				14E3F7B32B66C73500FCE5AF /* ProfileDetailView.swift in Sources */,
 				14E3F7902B66C4B200FCE5AF /* ArtifactViewController.swift in Sources */,
 				14E3F7B52B66C75900FCE5AF /* UserAuthenticationManager.swift in Sources */,
+				14E3F7F42B68A5D700FCE5AF /* UserProfileEditView.swift in Sources */,
 				14E3F7A02B66C5C500FCE5AF /* ImagePicker.swift in Sources */,
 				14E3F79C2B66C58F00FCE5AF /* ArtifactsView.swift in Sources */,
 				14E3F7B12B66C6D700FCE5AF /* HistoryView.swift in Sources */,

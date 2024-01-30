@@ -3,7 +3,7 @@
 import SwiftUI
 
 struct ContentView: View {
-@EnvironmentObject var userAuthManager: UserAuthenticationManager
+    @EnvironmentObject var userAuthManager: UserAuthenticationManager
 
     var body: some View {
         NavigationStack {
@@ -11,21 +11,19 @@ struct ContentView: View {
             case .initial:
                 PreviewView()
                     .onAppear {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                            userAuthManager.checkUserLoggedIn()
-                        }
+                        userAuthManager.checkUserLoggedIn()
                     }
 
             case .loggedIn:
-                MainTabView().environmentObject(userAuthManager.userData)
+                MainTabView()
 
             case .loggedOut:
-                LoginViewController(appState: $userAuthManager.appState).environmentObject(userAuthManager.userData)
-
+                LoginViewController(appState: $userAuthManager.appState)
             }
         }
     }
 }
+
 
 
 

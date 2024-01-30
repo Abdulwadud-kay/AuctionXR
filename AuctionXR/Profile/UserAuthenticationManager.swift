@@ -17,12 +17,15 @@ class UserAuthenticationManager: ObservableObject {
     var userData: UserData = UserData()
     
     func checkUserLoggedIn() {
-        if let user = Auth.auth().currentUser {
-            fetchUserDetails(user)
-        } else {
-            appState = .loggedOut
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { // Delay for the splash screen
+            if Auth.auth().currentUser != nil {
+                self.appState = .loggedIn
+            } else {
+                self.appState = .loggedOut
+            }
         }
     }
+
 
     func fetchUserDetails(_ user: FirebaseAuth.User) {
         let db = Firestore.firestore()

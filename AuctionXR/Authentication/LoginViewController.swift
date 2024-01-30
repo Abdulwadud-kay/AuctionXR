@@ -10,11 +10,6 @@ struct LoginViewController: View {
     @Binding var appState: AppState
     @EnvironmentObject var userAuthManager: UserAuthenticationManager
     
-    init(appState: Binding<AppState>) {
-            self._appState = appState
-            // Other initializations..
-        }
-    
     let backgroundColor = Color(hex: "f4e9dc")
     let buttonColor = Color(hex: "dbb88e")
     
@@ -37,7 +32,6 @@ struct LoginViewController: View {
                         .padding()
                 }
                 
- 
                 Button("Login") {
                     loginUser()
                 }
@@ -46,13 +40,12 @@ struct LoginViewController: View {
                 .foregroundColor(.white)
                 .cornerRadius(8)
                 .padding(.horizontal)
-
+                
                 NavigationLink(destination: RegisterViewController(appState: $appState).environmentObject(userAuthManager)) {
                     Text("Don't have an account? Register here")
                         .foregroundColor(buttonColor)
                         .underline()
                 }
-
                 .padding()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -64,29 +57,33 @@ struct LoginViewController: View {
     func loginUser() {
         Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
             if let user = authResult?.user {
-                let db = Firestore.firestore()
-                db.collection("users").document(user.uid).getDocument { document, error in
-                    if let document = document, document.exists {
-                        let username = document.get("username") as? String ?? "Unknown"
-                        userAuthManager.userData.updateUserDetails(email: user.email ?? "", username: username)
-                        
-                        // Set appState to initial to trigger PreviewView
-                        userAuthManager.appState = .initial
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                            userAuthManager.checkUserLoggedIn() // This will set appState to .loggedIn
-                        }
-                    } else {
-                        showError = true
-                        errorMessage = "Failed to fetch user details."
-                    }
+                self.fetchUserDetailsAndLogin(user)
+            } else if let error = error {
+                DispatchQueue.main.async {
+                    self.showError = true
+                    self.errorMessage = error.localizedDescription
                 }
-            } else {
-                showError = true
-                errorMessage = error?.localizedDescription ?? "Login error"
             }
         }
     }
     
+    private func fetchUserDetailsAndLogin(_ user: FirebaseAuth.User) {
+        let db = Firestore.firestore()
+        db.collection("users").document(user.uid).getDocument { document, error in
+            if let document = document, document.exists {
+                let username = document.get("username") as? String ?? "Unknown"
+                DispatchQueue.main.async {
+                    self.userAuthManager.userData.updateUserDetails(email: user.email ?? "", username: username)
+                    self.userAuthManager.appState = .loggedIn
+                }
+            } else {
+                DispatchQueue.main.async {
+                    self.showError = true
+                    self.errorMessage = "Failed to fetch user details."
+                }
+            }
+        }
+    }
     
     struct LoginViewController_Previews: PreviewProvider {
         static var previews: some View {

@@ -3,11 +3,12 @@ import FirebaseAuth
 
 struct ProfileView: View {
     @EnvironmentObject var sessionManager: UserData
-    @Binding var appState: AppState
-    @State private var isLoggingOut = false
-    @State private var navigateToLogin = false
-    @EnvironmentObject var userAuthManager: UserAuthenticationManager
-    
+        @Binding var appState: AppState
+        @State private var isEditingProfile = false // State to control profile editing view
+        @State private var isLoggingOut = false
+        @State private var navigateToLogin = false
+        @EnvironmentObject var userAuthManager: UserAuthenticationManager
+
     var body: some View {
         NavigationView {
             List {
@@ -66,38 +67,42 @@ struct ProfileView: View {
                 }
             }
             .listStyle(InsetGroupedListStyle())
-            .navigationBarTitle("Profile", displayMode: .inline)
-            .navigationBarItems(trailing: EditButton())
-            .alert(isPresented: $isLoggingOut) {
-                Alert(
-                    title: Text("Logout"),
-                    message: Text("Are you sure you want to logout?"),
-                    primaryButton: .destructive(Text("Logout")) {
-                        logoutUser()
-                    },
-                    secondaryButton: .cancel()
-                )
+                        .navigationBarTitle("Profile", displayMode: .inline)
+                        .navigationBarItems(trailing: Button("Edit") {
+                            isEditingProfile = true
+                        })
+                        .sheet(isPresented: $isEditingProfile) {
+                            // UserProfileEditView...
+                        }
+                        .alert(isPresented: $isLoggingOut) {
+                            Alert(
+                                title: Text("Logout"),
+                                message: Text("Are you sure you want to logout?"),
+                                primaryButton: .destructive(Text("Logout")) {
+                                    logoutUser()
+                                },
+                                secondaryButton: .cancel()
+                            )
+                        }
+                        NavigationLink(destination: LoginViewController(appState: $appState).environmentObject(sessionManager), isActive: $navigateToLogin) {
+                            EmptyView()
+                        }
+                        .hidden()
+                    }
+                }
+
+                private func logoutUser() {
+                    do {
+                        try Auth.auth().signOut()
+                        sessionManager.updateLoginState(isLoggedIn: false)
+                        appState = .initial
+                        navigateToLogin = true // Trigger navigation to login view
+                    } catch {
+                        print("Error logging out: \(error.localizedDescription)")
+                    }
+                }
             }
-            NavigationLink(destination: LoginViewController(appState: $appState).environmentObject(sessionManager), isActive: $navigateToLogin) {
-                EmptyView()
-            }
-            .hidden()
-        }
-    }
-    
-    private func logoutUser() {
-        do {
-            try Auth.auth().signOut()
-            sessionManager.updateLoginState(isLoggedIn: false)
-            appState = .initial // First set to initial to show PreviewView
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                userAuthManager.checkUserLoggedIn() // This will set appState to .loggedOut
-            }
-        } catch {
-            print("Error logging out: \(error.localizedDescription)")
-        }
-    }
-}
+
     
     struct ProfileView_Previews: PreviewProvider {
         @State static var appState = AppState.loggedOut
