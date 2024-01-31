@@ -2,19 +2,17 @@ import SwiftUI
 import FirebaseAuth
 
 struct ProfileView: View {
-    @EnvironmentObject var sessionManager: UserData
-        @Binding var appState: AppState
-        @State private var isEditingProfile = false // State to control profile editing view
-        @State private var isLoggingOut = false
-        @State private var navigateToLogin = false
-        @EnvironmentObject var userAuthManager: UserAuthenticationManager
+    @EnvironmentObject var userData: UserData
+    @EnvironmentObject var userAuthManager: UserAuthenticationManager
+    @State private var isEditingProfile = false
+    @State private var isLoggingOut = false
 
     var body: some View {
         NavigationView {
             List {
                 VStack {
                     HStack {
-                        if let image = sessionManager.userImage {
+                        if let image = userData.userImage {
                             Image(uiImage: image)
                                 .resizable()
                                 .scaledToFill()
@@ -25,13 +23,13 @@ struct ProfileView: View {
                                 .fill(Color.gray)
                                 .frame(width: 60, height: 60)
                                 .overlay(
-                                    Text(sessionManager.userInitial)
+                                    Text(userData.userInitial)
                                         .foregroundColor(.white)
                                         .font(.title)
                                 )
                         }
                         
-                        Text(sessionManager.userEmail)
+                        Text(userData.userEmail)
                             .font(.title3)
                             .padding(.leading)
                         
@@ -72,7 +70,7 @@ struct ProfileView: View {
                             isEditingProfile = true
                         })
                         .sheet(isPresented: $isEditingProfile) {
-                            // UserProfileEditView...
+                            UserProfileEditView()
                         }
                         .alert(isPresented: $isLoggingOut) {
                             Alert(
@@ -84,33 +82,24 @@ struct ProfileView: View {
                                 secondaryButton: .cancel()
                             )
                         }
-                        NavigationLink(destination: LoginViewController(appState: $appState).environmentObject(sessionManager), isActive: $navigateToLogin) {
-                            EmptyView()
-                        }
-                        .hidden()
                     }
                 }
 
                 private func logoutUser() {
                     do {
                         try Auth.auth().signOut()
-                        sessionManager.updateLoginState(isLoggedIn: false)
-                        appState = .initial
-                        navigateToLogin = true // Trigger navigation to login view
+                        userData.updateLoginState(isLoggedIn: false)
+                        userAuthManager.appState = .loggedOut
                     } catch {
                         print("Error logging out: \(error.localizedDescription)")
                     }
                 }
             }
 
-    
-    struct ProfileView_Previews: PreviewProvider {
-        @State static var appState = AppState.loggedOut
-        
-        static var previews: some View {
-            ProfileView(appState: $appState)
-                .environmentObject(UserData()) // <-- Make sure UserData conforms to ObservableObject
-                .environmentObject(UserAuthenticationManager()) // <-- Assuming you need to pass this too for the preview
-        }
-    }
-
+            struct ProfileView_Previews: PreviewProvider {
+                static var previews: some View {
+                    ProfileView()
+                        .environmentObject(UserData())
+                        .environmentObject(UserAuthenticationManager())
+                }
+            }

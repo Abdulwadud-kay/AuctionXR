@@ -2,24 +2,33 @@
 
 import SwiftUI
 
+
 struct ContentView: View {
     @EnvironmentObject var userAuthManager: UserAuthenticationManager
 
     var body: some View {
-        NavigationStack {
-            switch userAuthManager.appState {
-            case .initial:
-                PreviewView()
-                    .onAppear {
-                        userAuthManager.checkUserLoggedIn()
-                    }
-
-            case .loggedIn:
-                MainTabView()
-
-            case .loggedOut:
-                LoginViewController(appState: $userAuthManager.appState)
+            NavigationStack {
+                if userAuthManager.isLoading {
+                    PreviewView()  // A simple view that indicates loading is in progress
+                } else {
+                    viewForCurrentState()
+                }
             }
+        }
+    @ViewBuilder
+    private func viewForCurrentState() -> some View {
+        switch userAuthManager.appState {
+        case .initial:
+            PreviewView()
+                .onAppear {
+                    userAuthManager.checkUserLoggedIn()
+                }
+
+        case .loggedIn:
+            MainTabView()
+
+        case .loggedOut:
+            LoginViewController() // Updated to remove the appState parameter
         }
     }
 }
@@ -28,13 +37,14 @@ struct ContentView: View {
 
 
 
+
 struct MainTabView: View {
     @State private var selection = 0
-    @EnvironmentObject var userAuthManager: UserAuthenticationManager // Ensure you have access to this
+    @EnvironmentObject var userAuthManager: UserAuthenticationManager
     
     var body: some View {
         TabView(selection: $selection) {
-            HomeViewController(appState: $userAuthManager.appState) // Pass the appState here
+            HomeViewController() // No need to pass appState here
                 .tabItem {
                     Label("Home", systemImage: "house")
                 }
@@ -61,3 +71,4 @@ struct ContentView_Previews: PreviewProvider {
         ContentView().environmentObject(UserAuthenticationManager())
     }
 }
+

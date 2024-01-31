@@ -3,12 +3,11 @@ import FirebaseAuth
 import FirebaseFirestore
 
 struct RegisterViewController: View {
+    @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject var userAuthManager: UserAuthenticationManager
-    @Binding var appState: AppState
     @State private var username: String = ""
     @State private var email: String = ""
     @State private var password: String = ""
-    @State private var isRegistrationSuccessful = false
     @State private var showError = false
     @State private var errorMessage = ""
     
@@ -46,6 +45,7 @@ struct RegisterViewController: View {
                 // Register Button
                 Button("Register") {
                     registerUser()
+                    
                 }
                 .padding(8)
                 .background(buttonColor)
@@ -53,24 +53,23 @@ struct RegisterViewController: View {
                 .cornerRadius(8)
                 .padding(.horizontal)
                 
+           
+                
                 // Navigation to Login on Successful Registration
-                NavigationLink(destination: LoginViewController(appState: $appState).environmentObject(userAuthManager)) {
+                NavigationLink(destination: LoginViewController().environmentObject(userAuthManager)) {
                     Text("Already have an account? Login")
                         .foregroundColor(buttonColor)
                         .underline()
                 }
-                
-                
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(backgroundColor)
             .edgesIgnoringSafeArea(.all)
         }
-        
     }
     
     // Registration Function
-   
+    
     func registerUser() {
         Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
             if let user = authResult?.user {
@@ -84,22 +83,26 @@ struct RegisterViewController: View {
                         self.errorMessage = error.localizedDescription
                     } else {
                         DispatchQueue.main.async {
+                            
                             self.userAuthManager.appState = .loggedIn
+                            self.presentationMode.wrappedValue.dismiss()
                         }
                     }
                 }
-
+                
             } else if let error = error {
                 self.showError = true
                 self.errorMessage = error.localizedDescription
             }
         }
     }
-
+    
+}
     
     struct RegisterViewController_Previews: PreviewProvider {
         static var previews: some View {
-            RegisterViewController(appState: .constant(.initial)).environmentObject(UserAuthenticationManager())
+            RegisterViewController() // Updated to remove the appState parameter
+                .environmentObject(UserAuthenticationManager()) // Providing necessary environment object
         }
     }
-}
+

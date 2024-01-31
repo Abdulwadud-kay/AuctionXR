@@ -2,38 +2,47 @@ import SwiftUI
 import FirebaseAuth
 
 struct LogoutView: View {
+    @EnvironmentObject var userAuthManager: UserAuthenticationManager
     @EnvironmentObject var userData: UserData
-    @Binding var appState: AppState
-    @State private var navigateToLogin = false // State to control navigation
+    @State private var isLoggingOut = false // State to control the logout confirmation
 
     var body: some View {
-        NavigationView { // Wrap your view in NavigationView
+        NavigationView {
             VStack {
                 Text("Logout")
                     .font(.title)
                 Text("Are you sure you want to log out?")
                     .padding()
                 
-                Button("Logout", action: {
-                    // Log the user out using FirebaseAuth
-                    do {
-                        try Auth.auth().signOut()
-                        userData.updateLoginState(isLoggedIn: false) // Update the login state
-                        print("User logged out")
-                        
-                        // Set navigateToLogin to true to trigger navigation
-                        navigateToLogin = true
-                    } catch {
-                        print("Error logging out: \(error.localizedDescription)")
-                    }
-                })
+                Button("Logout") {
+                    isLoggingOut = true
+                }
                 .foregroundColor(.red)
-                
-                // Use NavigationLink to navigate to the login page
-                NavigationLink("", destination: LoginViewController(appState: $appState).environmentObject(userData), isActive: $navigateToLogin)
-                    .opacity(0)
+                .alert(isPresented: $isLoggingOut) {
+                    Alert(
+                        title: Text("Confirm Logout"),
+                        message: Text("Are you sure you want to log out?"),
+                        primaryButton: .destructive(Text("Logout")) {
+                            logoutUser()
+                        },
+                        secondaryButton: .cancel()
+                    )
+                }
             }
             .navigationBarTitle("Logout", displayMode: .inline)
         }
     }
+
+    private func logoutUser() {
+        do {
+            try Auth.auth().signOut()
+            userData.updateLoginState(isLoggedIn: false)
+            userAuthManager.appState = .loggedOut
+            print("User logged out")
+        } catch {
+            print("Error logging out: \(error.localizedDescription)")
+        }
+    }
 }
+
+// Assuming you have PreviewProvider here

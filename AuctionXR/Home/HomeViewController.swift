@@ -7,8 +7,8 @@ struct HomeViewController: View {
     let headerFooterColor = Color(hex: "dbb88e")
     let centerColor = Color(hex: "f4e9dc")
     let tabTitles = ["All", "Art", "Science", "Collections", "Special"]
-    @Binding var appState: AppState
     @EnvironmentObject var userAuthManager: UserAuthenticationManager
+
     
     
     
@@ -34,8 +34,11 @@ struct HomeViewController: View {
                                     .foregroundColor(.white)
                             }
                             .sheet(isPresented: $isShowingProfileView) {
-                                ProfileView(appState: $appState).environmentObject(userAuthManager)
+                                // Directly use ProfileView without passing appState
+                                ProfileView().environmentObject(userAuthManager)
                             }
+
+
 
 
 
@@ -112,10 +115,8 @@ struct HomeViewController: View {
 
 
 struct HomeViewController_Previews: PreviewProvider {
-    @State static var appState = AppState.initial // Define a State variable for appState
     static var previews: some View {
-        HomeViewController(appState: $appState) // Pass the binding to appState
-            .environmentObject(UserAuthenticationManager())
+        HomeViewController().environmentObject(UserAuthenticationManager())
     }
 }
 

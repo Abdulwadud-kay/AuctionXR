@@ -14,17 +14,17 @@ import Combine
 
 class UserAuthenticationManager: ObservableObject {
     @Published var appState: AppState = .initial
+    @Published var isLoading: Bool = false
     var userData: UserData = UserData()
     
     func checkUserLoggedIn() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { // Delay for the splash screen
-            if Auth.auth().currentUser != nil {
-                self.appState = .loggedIn
-            } else {
-                self.appState = .loggedOut
-            }
+        if Auth.auth().currentUser != nil {
+            self.appState = .loggedIn
+        } else {
+            self.appState = .loggedOut
         }
     }
+
 
 
     func fetchUserDetails(_ user: FirebaseAuth.User) {
@@ -35,6 +35,7 @@ class UserAuthenticationManager: ObservableObject {
                 let username = document.get("username") as? String ?? "Unknown"
                 self.userData.updateUserDetails(email: user.email ?? "", username: username)
                 self.appState = .loggedIn
+                
             } else {
                 print("User details not found: \(error?.localizedDescription ?? "")")
                 self.appState = .loggedOut
