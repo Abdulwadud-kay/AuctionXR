@@ -4,12 +4,14 @@ import FirebaseFirestore
 
 struct RegisterViewController: View {
     @Environment(\.presentationMode) var presentationMode
-    @EnvironmentObject var userAuthManager: UserAuthenticationManager
+    var showLogin: () -> Void
     @State private var username: String = ""
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var showError = false
     @State private var errorMessage = ""
+    @EnvironmentObject var userAuthManager: UserAuthenticationManager
+
     
     let backgroundColor = Color(hex: "f4e9dc")
     let buttonColor = Color(hex: "dbb88e")
@@ -53,23 +55,22 @@ struct RegisterViewController: View {
                 .cornerRadius(8)
                 .padding(.horizontal)
                 
-           
+                
                 
                 // Navigation to Login on Successful Registration
-                NavigationLink(destination: LoginViewController().environmentObject(userAuthManager)) {
-                    Text("Already have an account? Login")
-                        .foregroundColor(buttonColor)
-                        .underline()
-                }
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(backgroundColor)
-            .edgesIgnoringSafeArea(.all)
-        }
-    }
-    
-    // Registration Function
-    
+                Button("Already have an account? Login") {
+                                    showLogin()
+                                }
+                                .foregroundColor(buttonColor)
+                                .underline()
+                                .padding()
+                            }
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(backgroundColor)
+                            .edgesIgnoringSafeArea(.all)
+                        }
+                    }
+                
     func registerUser() {
         Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
             if let user = authResult?.user {
@@ -95,14 +96,12 @@ struct RegisterViewController: View {
                 self.errorMessage = error.localizedDescription
             }
         }
+        
     }
-    
+    }
+struct RegisterViewController_Previews: PreviewProvider {
+    static var previews: some View {
+        RegisterViewController(showLogin: {}) // Provide an empty closure
+            .environmentObject(UserAuthenticationManager())
+    }
 }
-    
-    struct RegisterViewController_Previews: PreviewProvider {
-        static var previews: some View {
-            RegisterViewController() // Updated to remove the appState parameter
-                .environmentObject(UserAuthenticationManager()) // Providing necessary environment object
-        }
-    }
-

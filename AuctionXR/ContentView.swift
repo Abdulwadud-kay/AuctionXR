@@ -1,37 +1,39 @@
 // ContentView.swift
 
-import SwiftUI
 
+
+import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var userAuthManager: UserAuthenticationManager
 
     var body: some View {
-            NavigationStack {
-                if userAuthManager.isLoading {
-                    PreviewView()  // A simple view that indicates loading is in progress
-                } else {
-                    viewForCurrentState()
-                }
-            }
-        }
-    @ViewBuilder
-    private func viewForCurrentState() -> some View {
         switch userAuthManager.appState {
-        case .initial:
-            PreviewView()
-                .onAppear {
-                    userAuthManager.checkUserLoggedIn()
-                }
-
+        case .initial, .loggedOut:
+            AuthenticationView().environmentObject(userAuthManager)
         case .loggedIn:
-            MainTabView()
-
-        case .loggedOut:
-            LoginViewController() // Updated to remove the appState parameter
+            MainTabView()  // Replace with your actual MainTabView
         }
     }
 }
+
+
+
+struct AuthenticationView: View {
+    @State private var showingLogin = true
+    @EnvironmentObject var userAuthManager: UserAuthenticationManager
+
+    var body: some View {
+        if showingLogin {
+            LoginViewController(showRegister: { showingLogin = false })
+                .environmentObject(userAuthManager)
+        } else {
+            RegisterViewController(showLogin: { showingLogin = true })
+                .environmentObject(userAuthManager)
+        }
+    }
+}
+
 
 
 

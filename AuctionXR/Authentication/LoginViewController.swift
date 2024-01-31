@@ -4,11 +4,13 @@ import FirebaseFirestore
 
 struct LoginViewController: View {
     @Environment(\.presentationMode) var presentationMode
+    var showRegister: () -> Void
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var showError = false
     @State private var errorMessage = ""
     @EnvironmentObject var userAuthManager: UserAuthenticationManager
+    
     
     let backgroundColor = Color(hex: "f4e9dc")
     let buttonColor = Color(hex: "dbb88e")
@@ -41,22 +43,23 @@ struct LoginViewController: View {
                 .cornerRadius(8)
                 .padding(.horizontal)
                 
-                NavigationLink(destination: RegisterViewController().environmentObject(userAuthManager)) {
-                    Text("Don't have an account? Register here")
-                        .foregroundColor(buttonColor)
-                        .underline()
+                Button("Don't have an account? Register here") {
+                    showRegister()
                 }
+                .foregroundColor(buttonColor)
+                .underline()
                 .padding()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(backgroundColor)
             .edgesIgnoringSafeArea(.all)
+            .background(backgroundColor)
         }
     }
     
+    
     func loginUser() {
         Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
-                if let user = authResult?.user {
+            if let user = authResult?.user {
                 // Call fetchUserDetails from UserAuthenticationManager
                 self.userAuthManager.fetchUserDetails(user)
                 self.presentationMode.wrappedValue.dismiss()
@@ -71,12 +74,11 @@ struct LoginViewController: View {
     
     
     
-    
-    struct LoginViewController_Previews: PreviewProvider {
-        static var previews: some View {
-            LoginViewController() // Updated to remove the appState parameter
-                .environmentObject(UserAuthenticationManager()) // Providing necessary environment object
-        }
-    }
-    
 }
+struct LoginViewController_Previews: PreviewProvider {
+    static var previews: some View {
+        LoginViewController(showRegister: {}) // Provide an empty closure
+            .environmentObject(UserAuthenticationManager())
+    }
+}
+
