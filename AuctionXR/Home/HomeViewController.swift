@@ -5,26 +5,20 @@ struct HomeViewController: View {
     @State private var isShowingProfileView = false
     @State private var selectedTabIndex = 0
     let headerFooterColor = Color(hex: "dbb88e")
-    let centerColor = Color(hex: "f4e9dc")
+    let centerColor = Color.white
     let tabTitles = ["All", "Art", "Science", "Collections", "Special"]
     @EnvironmentObject var userAuthManager: UserAuthenticationManager
 
-    
-    
-    
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
                 ZStack {
                     headerFooterColor
-                        .frame(height: 140)
+                        .frame(height: 130)  // Reduced height
                         .edgesIgnoringSafeArea(.top)
-                    
-                    VStack {
-                        HStack(spacing: 10) {
-                            // Profile Icon as a button that sets the selected profile
-                            // Profile Icon as a button for navigation
-                            // Profile Icon as a button for navigation
+
+                    VStack(spacing: 45) {  // Increased spacing
+                        HStack(spacing:0) {
                             Button(action: {
                                 isShowingProfileView = true
                             }) {
@@ -34,20 +28,12 @@ struct HomeViewController: View {
                                     .foregroundColor(.white)
                             }
                             .sheet(isPresented: $isShowingProfileView) {
-                                // Directly use ProfileView without passing appState
                                 ProfileView().environmentObject(userAuthManager)
                             }
-
-
-
-
-
                             .padding(.leading, 10)
 
-
                             Spacer()
-                            
-                            // Search Bar
+
                             HStack {
                                 Image(systemName: "magnifyingglass")
                                     .foregroundColor(.black)
@@ -57,11 +43,10 @@ struct HomeViewController: View {
                                     .padding(.vertical, 6)
                             }
                             .background(RoundedRectangle(cornerRadius: 30).fill(Color.white))
-                            .frame(height: 40)
+                            .frame(height: 100)
 
                             Spacer()
 
-                            // Cart Icon
                             NavigationLink(destination: SoldItemsView()) {
                                 VStack {
                                     Image(systemName: "cart")
@@ -75,25 +60,21 @@ struct HomeViewController: View {
                             .padding(.top, 6)
                             .padding(.vertical, 6)
                         }
-                        .frame(height: 40)
-                        .padding(.top, 45)
-                        
-                        // Picker as the segmented control for tabs
+                        .frame(height: 0)
+                        .padding(.top, 100)  // Adjust padding to lower the elements
+
                         Picker("Categories", selection: $selectedTabIndex) {
                             ForEach(0..<tabTitles.count, id: \.self) { index in
                                 Text(self.tabTitles[index]).tag(index)
                             }
                         }
                         .pickerStyle(SegmentedPickerStyle())
-                        .padding()
-                        .background(headerFooterColor)
+                        .padding(.horizontal)  // Add horizontal padding
                     }
                 }
 
-                // TabView for swiping between tabs
                 TabView(selection: $selectedTabIndex) {
                     ForEach(0..<tabTitles.count, id: \.self) { index in
-                        // Replace with actual content views for each tab
                         Text("Content for \(tabTitles[index])")
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                             .background(centerColor)
@@ -101,23 +82,21 @@ struct HomeViewController: View {
                     }
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-                .frame(height: 300) // Adjust this height as needed
+                .frame(height: 300)
                 
                 Spacer()
-                // Center Content (if any)
-                // ...
             }
             .edgesIgnoringSafeArea(.all)
         }
     }
 }
 
-
-
 struct HomeViewController_Previews: PreviewProvider {
     static var previews: some View {
         HomeViewController().environmentObject(UserAuthenticationManager())
     }
 }
+
+
 
 

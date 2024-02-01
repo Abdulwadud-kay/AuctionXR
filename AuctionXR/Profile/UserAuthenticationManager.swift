@@ -17,6 +17,10 @@ class UserAuthenticationManager: ObservableObject {
     @Published var isLoading: Bool = false
     var userData: UserData = UserData()
     
+    init() {
+            checkUserLoggedIn()
+        }
+    
     func checkUserLoggedIn() {
         if Auth.auth().currentUser != nil {
             self.appState = .loggedIn

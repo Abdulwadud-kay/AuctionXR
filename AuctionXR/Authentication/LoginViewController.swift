@@ -11,22 +11,31 @@ struct LoginViewController: View {
     @State private var errorMessage = ""
     @EnvironmentObject var userAuthManager: UserAuthenticationManager
     
-    
     let backgroundColor = Color(hex: "f4e9dc")
     let buttonColor = Color(hex: "dbb88e")
     
     var body: some View {
         NavigationStack {
             VStack(spacing: 15) {
+                HStack {
+                Image(systemName: "envelope")
+                    .foregroundColor(Color(buttonColor))
+                    .padding(.leading, 3)
                 TextField("Email", text: $email)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding(.horizontal)
                     .autocapitalization(.none)
                     .keyboardType(.emailAddress)
+            }
+                .padding(.horizontal)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
                 
+                HStack {
+                Image(systemName: "lock")
+                .foregroundColor(Color(buttonColor))
+                .padding(.leading, 8)
                 SecureField("Password", text: $password)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding(.horizontal)
+            }
+            .padding(.horizontal)
+            .textFieldStyle(RoundedBorderTextFieldStyle())
                 
                 if showError {
                     Text(errorMessage)
@@ -51,16 +60,14 @@ struct LoginViewController: View {
                 .padding()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .edgesIgnoringSafeArea(.all)
             .background(backgroundColor)
+            .edgesIgnoringSafeArea(.all)
         }
     }
-    
     
     func loginUser() {
         Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
             if let user = authResult?.user {
-                // Call fetchUserDetails from UserAuthenticationManager
                 self.userAuthManager.fetchUserDetails(user)
                 self.presentationMode.wrappedValue.dismiss()
             } else if let error = error {
@@ -71,14 +78,11 @@ struct LoginViewController: View {
             }
         }
     }
-    
-    
-    
 }
+
 struct LoginViewController_Previews: PreviewProvider {
     static var previews: some View {
-        LoginViewController(showRegister: {}) // Provide an empty closure
+        LoginViewController(showRegister: {})
             .environmentObject(UserAuthenticationManager())
     }
 }
-

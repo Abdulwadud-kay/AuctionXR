@@ -12,48 +12,58 @@ struct RegisterViewController: View {
     @State private var errorMessage = ""
     @EnvironmentObject var userAuthManager: UserAuthenticationManager
 
-    
     let backgroundColor = Color(hex: "f4e9dc")
     let buttonColor = Color(hex: "dbb88e")
     
     var body: some View {
         NavigationStack {
             VStack(spacing: 15) {
-                // Username Input
+                HStack {
+                Image(systemName: "person")
+                    .foregroundColor(Color(buttonColor))
+                    .padding(.leading, 8)
                 TextField("Username", text: $username)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding(.horizontal)
                     .autocapitalization(.none)
-                
-                // Email Input
-                TextField("Email", text: $email)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                }
                     .padding(.horizontal)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                
+                HStack {
+                Image(systemName: "envelope")
+                    .foregroundColor(Color(buttonColor))
+                    .padding(.leading, 3)
+                TextField("Email", text: $email)
                     .autocapitalization(.none)
                     .keyboardType(.emailAddress)
+            }
+                .padding(.horizontal)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
                 
-                // Password Input
+                HStack {
+                Image(systemName: "lock")
+                .foregroundColor(Color(buttonColor))
+                .padding(.leading, 8)
                 SecureField("Password", text: $password)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding(.horizontal)
+            }
+            .padding(.horizontal)
+            .textFieldStyle(RoundedBorderTextFieldStyle())
                 
-                // Error Message Display
                 if showError {
                     Text(errorMessage)
                         .foregroundColor(.red)
                         .padding()
                 }
                 
-                // Register Button
                 Button("Register") {
                     registerUser()
-                    
                 }
                 .padding(8)
                 .background(buttonColor)
                 .foregroundColor(.white)
                 .cornerRadius(8)
                 .padding(.horizontal)
+                
+
                 
                 
                 
