@@ -96,6 +96,7 @@ struct RegisterViewController: View {
                         DispatchQueue.main.async {
                             
                             self.userAuthManager.appState = .loggedIn
+                            self.userAuthManager.fetchUserDetails(user)
                             self.presentationMode.wrappedValue.dismiss()
                         }
                     }

@@ -7,14 +7,6 @@
 
 import Foundation
 
-struct Profile: Hashable {
-    let id: UUID
-    let username: String
-    let email: String
-    // Add other relevant fields
-}
-
-
 
 enum AppState {
     case initial

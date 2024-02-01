@@ -69,7 +69,6 @@ struct LoginViewController: View {
         Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
             if let user = authResult?.user {
                 self.userAuthManager.fetchUserDetails(user)
-                self.presentationMode.wrappedValue.dismiss()
             } else if let error = error {
                 DispatchQueue.main.async {
                     self.showError = true
@@ -84,5 +83,6 @@ struct LoginViewController_Previews: PreviewProvider {
     static var previews: some View {
         LoginViewController(showRegister: {})
             .environmentObject(UserAuthenticationManager())
+            .environmentObject(UserData())
     }
 }

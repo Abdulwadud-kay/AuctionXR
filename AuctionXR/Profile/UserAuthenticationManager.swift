@@ -14,35 +14,39 @@ import Combine
 
 class UserAuthenticationManager: ObservableObject {
     @Published var appState: AppState = .initial
-    @Published var isLoading: Bool = false
     var userData: UserData = UserData()
     
     init() {
-            checkUserLoggedIn()
-        }
+        checkUserLoggedIn()
+    }
     
     func checkUserLoggedIn() {
-        if Auth.auth().currentUser != nil {
-            self.appState = .loggedIn
+        if let currentUser = Auth.auth().currentUser {
+            fetchUserDetails(currentUser)
         } else {
             self.appState = .loggedOut
         }
     }
-
-
-
+    
     func fetchUserDetails(_ user: FirebaseAuth.User) {
         let db = Firestore.firestore()
         db.collection("users").document(user.uid).getDocument { [weak self] document, error in
             guard let self = self else { return }
             if let document = document, document.exists {
                 let username = document.get("username") as? String ?? "Unknown"
-                self.userData.updateUserDetails(email: user.email ?? "", username: username)
-                self.appState = .loggedIn
-                
+                DispatchQueue.main.async {
+                    self.userData.updateUserDetails(email: user.email ?? "", username: username)
+                    // Ensure userImage is nil for new users
+                    self.userData.userImage = nil
+                    self.appState = .loggedIn
+                }
             } else {
-                print("User details not found: \(error?.localizedDescription ?? "")")
-                self.appState = .loggedOut
+                // User details not found - treat as a new user
+                DispatchQueue.main.async {
+                    self.userData.updateUserDetails(email: user.email ?? "", username: "")
+                    self.userData.userImage = nil
+                    self.appState = .loggedIn
+                }
             }
         }
     }
