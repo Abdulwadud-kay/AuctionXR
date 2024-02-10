@@ -1,161 +1,184 @@
+
 import SwiftUI
+import PhotosUI
 import FirebaseStorage
 import FirebaseFirestore
+import AVKit
 
 struct CreateArtifactView: View {
-    // State variables for form fields
+    @State private var title: String = ""
     @State private var description: String = ""
     @State private var startingPrice: String = ""
-    @State private var title: String = ""
     @State private var selectedCategory: String = "Select Category"
     @State private var acceptTerms: Bool = false
-    @State private var showImagePicker = false
-    @State private var imageSource: UIImagePickerController.SourceType = .photoLibrary
-    @State private var selectedImage: UIImage?
-
-    // Placeholder image name (local asset)
-    let placeholderImageName = "ArtifactImage"
+    @State private var selectedImages: [UIImage] = []
+    @State private var selectedVideoURL: URL?
+    @State private var showImagePicker: Bool = false
+    @State private var showVideoPicker: Bool = false
+    
+    let backgroundColor = Color(hex: "dbb88e") // Ensure you have a method to initialize Color with hex.
+    let  iconColor = Color(.white)
+    let gradientTop = Color(hex: "dbb88e")
+    let gradientBottom = Color.white
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 10) {
-                // Title field
-                Text("Title").font(.headline)
-                TextField("Enter title", text: $title).textFieldStyle(RoundedBorderTextFieldStyle())
-
-                // Description field
-                Text("Description").font(.headline)
-                TextField("Enter description", text: $description).textFieldStyle(RoundedBorderTextFieldStyle())
-
-                // Starting price field
-                Text("Starting Price").font(.headline)
-                TextField("Enter price", text: $startingPrice).textFieldStyle(RoundedBorderTextFieldStyle()).keyboardType(.numberPad)
-
-                // Category picker
-                Text("Category").font(.headline)
-                Picker("Select Category", selection: $selectedCategory) {
+        ScrollView (showsIndicators: false){
+            VStack(alignment: .leading, spacing: 20) {
+                Spacer(minLength: 10)
+                TextField("Title", text: $title)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding(.horizontal)
+                
+                VStack(alignment: .leading) {
+                    Text("Description")
+                        .font(.headline)
+                        .foregroundColor(.black)
+                        .padding(.horizontal)
+                    TextEditor(text: $description)
+                        .frame(height: 100)
+                        .cornerRadius(5)
+                        .overlay(RoundedRectangle(cornerRadius: 5).stroke(Color.gray, lineWidth: 0))
+                        .padding()
+                        .foregroundColor(.gray) // Placeholder text color
+                }
+                
+                TextField("Starting Price", text: $startingPrice)
+                    .keyboardType(.decimalPad)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding(.horizontal)
+                
+                Picker("Category", selection: $selectedCategory) {
                     Text("Art").tag("Art")
                     Text("Collections").tag("Collections")
                     Text("Science").tag("Science")
-                    Text("Special").tag("special")
-                }.pickerStyle(MenuPickerStyle())
-
-                // Terms and conditions toggle
-                Toggle(isOn: $acceptTerms) {
-                    Text("Accept Terms & Conditions")
+                    Text("Special").tag("Special")
                 }
-
-                // Image Upload Buttons
-                HStack {
+                .pickerStyle(MenuPickerStyle())
+                .padding(.horizontal)
+                
+                Toggle("Accept Terms & Conditions", isOn: $acceptTerms)
+                    .padding(.horizontal)
+                
+                HStack(spacing: 30) { // Adjust spacing as needed
                     Button(action: {
-                        self.imageSource = .camera
-                        self.showImagePicker = true
+                        showImagePicker = true
                     }) {
                         VStack {
                             Image(systemName: "camera.fill")
-                            Text("Take Picture")
+                                .font(.title)
+                                .foregroundColor(.white)
+                            Text("Add Image")
+                                .foregroundColor(.white)
+                                .font(.caption)
                         }
-                    }.buttonStyle(SecondaryButtonStyle())
-                    Spacer()
+                    }
+                    .disabled(selectedImages.count >= 4)
+                    
                     Button(action: {
-                        self.imageSource = .photoLibrary
-                        self.showImagePicker = true
+                        showVideoPicker = true
                     }) {
                         VStack {
-                            Image(systemName: "doc.fill")
-                            Text("Upload from File")
+                            Image(systemName: "video.fill")
+                                .font(.title)
+                                .foregroundColor(.white)
+                            Text("Add Video")
+                                .foregroundColor(.white)
+                                .font(.caption)
                         }
-                    }.buttonStyle(SecondaryButtonStyle())
+                    }
+                    .disabled(selectedVideoURL != nil)
                 }
-
-                // Submit Button
-                Button("Submit") {
-                    submitArtifact()
-                }.padding(10)
-                .background(Color("dbb88e"))
-                .foregroundColor(.white)
-                .cornerRadius(10)
-            }.padding()
-        }.sheet(isPresented: $showImagePicker) {
-            ImagePicker(selectedImage: $selectedImage, sourceType: imageSource)
-        }.background(Color(hex: "f4e9dc"))
-         .navigationBarTitle("Create Artifact", displayMode: .inline)
+                .padding()
+                
+                
+                
+                
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack {
+                        ForEach(selectedImages, id: \.self) { image in
+                            Image(uiImage: image)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 100, height: 100)
+                                .cornerRadius(8)
+                        }
+                    }
+                }
+                .frame(height: 120)
+                .padding(.vertical)
+                
+                if let selectedVideoURL = selectedVideoURL {
+                    VideoPlayer(player: AVPlayer(url: selectedVideoURL))
+                        .frame(height: 200)
+                }
+                
+            VStack(spacing: 20) {
+                HStack {
+                    Text("Save for Later")
+                        .font(.subheadline)
+                        .foregroundColor(backgroundColor)
+                        .onTapGesture {
+                            // Implement Save for Later functionality
+                        }
+                    
+                    Spacer()
+                    
+                    Button("Submit") {
+                        submitArtifact()
+                    }
+                    
+                    .disabled(!isFormComplete)
+                    .padding()
+                    .frame(width: 100, height: 40)
+                    .background(backgroundColor)
+                    .cornerRadius(25)
+                    .foregroundColor(Color.white)
+                }
+                .padding([.horizontal, .bottom])
+                .padding(.top, -170)
+              }
+            
+            }
+        }
+        .background(LinearGradient(gradient: Gradient(colors: [gradientTop, gradientBottom]), startPoint: .top, endPoint: .bottom).edgesIgnoringSafeArea(.all))
+        .sheet(isPresented: $showImagePicker) {
+                   PhotoPicker(selectedImages: $selectedImages, limit: 4 - selectedImages.count) // Adjust the limit based on already selected images
+               }
+        .sheet(isPresented: $showVideoPicker) {
+            VideoPicker(selectedVideoURL: $selectedVideoURL)
+        }
     }
 
-    // Submit artifact function
+    private var isFormComplete: Bool {
+        !title.isEmpty && !description.isEmpty && !startingPrice.isEmpty && selectedCategory != "Select Category" && acceptTerms && (!selectedImages.isEmpty || selectedVideoURL != nil)
+    }
     private func submitArtifact() {
-        let startingPriceDouble = Double(startingPrice) ?? 0.0
-        if let selectedImage = selectedImage {
-            uploadImage(selectedImage) { imageUrl in
-                self.saveArtifact(title: self.title, description: self.description, startingPrice: startingPriceDouble, category: self.selectedCategory, imageUrl: imageUrl)
-            }
-        } else {
-            self.saveArtifact(title: self.title, description: self.description, startingPrice: startingPriceDouble, category: self.selectedCategory, imageUrl: nil)
-        }
-    }
-
-    // Upload image to Firebase Storage and retrieve URL
-    private func uploadImage(_ image: UIImage, completion: @escaping (String?) -> Void) {
-        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
-            print("Could not convert the image to Data")
-            completion(nil)
-            return
-        }
-
         let storageRef = Storage.storage().reference()
-        let imageRef = storageRef.child("images/\(UUID().uuidString).jpg")
+        
+        for image in selectedImages {
+            guard let imageData = image.jpegData(compressionQuality: 0.8) else { continue }
+            let imageRef = storageRef.child("artifacts/\(UUID().uuidString).jpg")
 
-        imageRef.putData(imageData, metadata: nil) { (metadata, error) in
-            if let error = error {
-                print("Error uploading image: \(error.localizedDescription)")
-                completion(nil)
-                return
-            }
-
-            imageRef.downloadURL { (url, error) in
-                guard let downloadURL = url else {
-                    print("Error fetching downloadURL: \(error?.localizedDescription ?? "")")
-                    completion(nil)
+            imageRef.putData(imageData, metadata: nil) { metadata, error in
+                guard metadata != nil else {
+                    print(error?.localizedDescription ?? "Unknown error")
                     return
                 }
-
-                completion(downloadURL.absoluteString)
+                imageRef.downloadURL { url, error in
+                    guard let downloadURL = url else {
+                        print(error?.localizedDescription ?? "Unknown error")
+                        return
+                    }
+                    print("Image URL: \(downloadURL.absoluteString)")
+     
+                }
             }
         }
-    }
 
-    // Save artifact details to Firestore
-    private func saveArtifact(title: String, description: String, startingPrice: Double, category: String, imageUrl: String?) {
-        let db = Firestore.firestore()
-        db.collection("artifacts").addDocument(data: [
-            "title": title,
-            "description": description,
-            "startingPrice": startingPrice,
-            "category": category,
-            "imageUrl": imageUrl ?? placeholderImageName,
-            "isBidded": false
-            // Add other fields as needed
-        ]) { error in
-            if let error = error {
-                print("Error saving artifact: \(error.localizedDescription)")
-            } else {
-                print("Artifact saved successfully")
-            }
-        }
+ 
     }
 }
 
-struct SecondaryButtonStyle: ButtonStyle {
-    let accentColor = Color("dbb88e")
-
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .padding(.all, 4)
-            .background(accentColor.opacity(configuration.isPressed ? 0.5 : 1))
-            .foregroundColor(.white)
-            .cornerRadius(8)
-    }
-}
 
 struct CreateArtifactView_Previews: PreviewProvider {
     static var previews: some View {

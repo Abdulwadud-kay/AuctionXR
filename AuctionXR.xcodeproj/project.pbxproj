@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		149A51ED2B75B83500ABF695 /* MultiImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 149A51EC2B75B83500ABF695 /* MultiImagePicker.swift */; };
+		149A51EF2B770ADC00ABF695 /* VideoPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 149A51EE2B770ADC00ABF695 /* VideoPicker.swift */; };
 		14E3F77A2B66C35100FCE5AF /* AuctionXRApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14E3F7792B66C35100FCE5AF /* AuctionXRApp.swift */; };
 		14E3F77C2B66C35200FCE5AF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14E3F77B2B66C35200FCE5AF /* ContentView.swift */; };
 		14E3F77E2B66C35600FCE5AF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 14E3F77D2B66C35600FCE5AF /* Assets.xcassets */; };
@@ -63,6 +65,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		149A51EC2B75B83500ABF695 /* MultiImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiImagePicker.swift; sourceTree = "<group>"; };
+		149A51EE2B770ADC00ABF695 /* VideoPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPicker.swift; sourceTree = "<group>"; };
 		14E3F7762B66C35100FCE5AF /* AuctionXR.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AuctionXR.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		14E3F7792B66C35100FCE5AF /* AuctionXRApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuctionXRApp.swift; sourceTree = "<group>"; };
 		14E3F77B2B66C35200FCE5AF /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -194,6 +198,8 @@
 				14E3F79B2B66C58F00FCE5AF /* ArtifactsView.swift */,
 				14E3F79D2B66C5A600FCE5AF /* UserData.swift */,
 				14E3F79F2B66C5C400FCE5AF /* ImagePicker.swift */,
+				149A51EC2B75B83500ABF695 /* MultiImagePicker.swift */,
+				149A51EE2B770ADC00ABF695 /* VideoPicker.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -333,6 +339,7 @@
 				14E3F79E2B66C5A600FCE5AF /* UserData.swift in Sources */,
 				14E3F79A2B66C56B00FCE5AF /* ArtifactDetailView.swift in Sources */,
 				14E3F7902B66C4B200FCE5AF /* ArtifactViewController.swift in Sources */,
+				149A51EF2B770ADC00ABF695 /* VideoPicker.swift in Sources */,
 				14E3F7B52B66C75900FCE5AF /* UserAuthenticationManager.swift in Sources */,
 				14E3F7A02B66C5C500FCE5AF /* ImagePicker.swift in Sources */,
 				14E3F79C2B66C58F00FCE5AF /* ArtifactsView.swift in Sources */,
@@ -343,6 +350,7 @@
 				14E3F7A52B66C62D00FCE5AF /* StateData.swift in Sources */,
 				14E3F7A32B66C61000FCE5AF /* ProfileView.swift in Sources */,
 				14E3F7892B66C3F800FCE5AF /* LoginViewController.swift in Sources */,
+				149A51ED2B75B83500ABF695 /* MultiImagePicker.swift in Sources */,
 				14E3F7AB2B66C67A00FCE5AF /* LogoutView.swift in Sources */,
 				14E3F7962B66C52500FCE5AF /* SoldItemsView.swift in Sources */,
 				14E3F7AD2B66C69900FCE5AF /* HelpView.swift in Sources */,
