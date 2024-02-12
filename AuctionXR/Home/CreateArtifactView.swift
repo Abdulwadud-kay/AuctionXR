@@ -16,6 +16,9 @@ struct CreateArtifactView: View {
     @State private var showImagePicker: Bool = false
     @State private var showVideoPicker: Bool = false
     @State private var bidEndDate: Date = Date()
+    @State private var minBidEndDate: Date = Date().addingTimeInterval(30 * 60)
+    @State private var maxBidEndDate: Date = Calendar.current.date(byAdding: .year, value: 2, to: Date())! // 2 years from now
+
     
     let minBidDuration: TimeInterval = 30 * 60 // 30 minutes in seconds
     let maxBidDuration: TimeInterval = 2 * 365 * 24 * 60 * 60 // 2 years in seconds
@@ -52,13 +55,28 @@ struct CreateArtifactView: View {
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding(.horizontal)
                 VStack(alignment: .leading) {
-                        Text("Bid End Date")
-                            .font(.headline)
-                            .padding(.horizontal)
-                        DatePicker("Bid End Date", selection: $bidEndDate, in: bidEndDateRange, displayedComponents: [.date, .hourAndMinute])
-                            .datePickerStyle(GraphicalDatePickerStyle())
-                            .padding(.horizontal)
+                    Text("Bid End Date")
+                        .font(.headline)
+                        .padding(.horizontal)
+                    DatePicker(
+                        "Bid End Date",
+                        selection: $bidEndDate,
+                        in: minBidEndDate...maxBidEndDate,
+                        displayedComponents: [.date, .hourAndMinute]
+                    )
+                    .onChange(of: bidEndDate) { newValue in
+                        // Check if the selected date is today; if so, ensure time is at least 30 mins from now
+                        if Calendar.current.isDateInToday(newValue) {
+                            let nowPlus30Mins = Date().addingTimeInterval(30 * 60)
+                            if newValue < nowPlus30Mins {
+                                bidEndDate = nowPlus30Mins
+                            }
+                        }
                     }
+                    .datePickerStyle(GraphicalDatePickerStyle())
+                    .padding(.horizontal)
+                }
+
                 
                 Picker("Category", selection: $selectedCategory) {
                     Text("Art").tag("Art")
@@ -108,23 +126,42 @@ struct CreateArtifactView: View {
                 
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack {
-                        ForEach(selectedImages, id: \.self) { image in
-                            Image(uiImage: image)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 100, height: 100)
-                                .cornerRadius(8)
+                        ForEach(selectedImages.indices, id: \.self) { index in
+                            ZStack(alignment: .topTrailing) {
+                                Image(uiImage: selectedImages[index])
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 100, height: 100)
+                                    .cornerRadius(8)
+
+                                Button(action: {
+                                    selectedImages.remove(at: index)
+                                }) {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundColor(.black)
+                                        .padding(3)
+                                }
+                                .padding(.trailing, 5)
+                            }
                         }
                     }
                 }
                 .frame(height: 120)
                 .padding(.vertical)
+
                 
                 if let selectedVideoURL = selectedVideoURL {
                     VideoPlayer(player: AVPlayer(url: selectedVideoURL))
                         .frame(height: 200)
+                    
+                    Button(action: {
+                        self.selectedVideoURL = nil
+                    }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.black)
+                            .padding(3)
+                    }
                 }
-                
             VStack(spacing: 20) {
                 HStack {
                     Text("Save for Later")
@@ -148,7 +185,7 @@ struct CreateArtifactView: View {
                     .foregroundColor(Color.white)
                 }
                 .padding([.horizontal, .bottom])
-                .padding(.top, -170)
+                .padding(.top, -10)
               }
             
             }
