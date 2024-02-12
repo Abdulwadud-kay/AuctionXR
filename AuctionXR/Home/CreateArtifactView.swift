@@ -15,6 +15,11 @@ struct CreateArtifactView: View {
     @State private var selectedVideoURL: URL?
     @State private var showImagePicker: Bool = false
     @State private var showVideoPicker: Bool = false
+    @State private var bidEndDate: Date = Date()
+    
+    let minBidDuration: TimeInterval = 30 * 60 // 30 minutes in seconds
+    let maxBidDuration: TimeInterval = 2 * 365 * 24 * 60 * 60 // 2 years in seconds
+    let bidEndDateRange: ClosedRange<Date> = Date()...(Date() + 2 * 365 * 24 * 60 * 60) // From now to 2 years in the future
     
     let backgroundColor = Color(hex: "dbb88e") // Ensure you have a method to initialize Color with hex.
     let  iconColor = Color(.white)
@@ -46,6 +51,14 @@ struct CreateArtifactView: View {
                     .keyboardType(.decimalPad)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding(.horizontal)
+                VStack(alignment: .leading) {
+                        Text("Bid End Date")
+                            .font(.headline)
+                            .padding(.horizontal)
+                        DatePicker("Bid End Date", selection: $bidEndDate, in: bidEndDateRange, displayedComponents: [.date, .hourAndMinute])
+                            .datePickerStyle(GraphicalDatePickerStyle())
+                            .padding(.horizontal)
+                    }
                 
                 Picker("Category", selection: $selectedCategory) {
                     Text("Art").tag("Art")

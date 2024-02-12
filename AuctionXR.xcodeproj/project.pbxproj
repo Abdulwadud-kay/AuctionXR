@@ -44,7 +44,7 @@
 		14E3F7C72B66CB1900FCE5AF /* FirebaseAppDistribution-Beta in Frameworks */ = {isa = PBXBuildFile; productRef = 14E3F7C62B66CB1900FCE5AF /* FirebaseAppDistribution-Beta */; };
 		14E3F7C92B66CB1900FCE5AF /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 14E3F7C82B66CB1900FCE5AF /* FirebaseAuth */; };
 		14E3F7CB2B66CB1900FCE5AF /* FirebaseAuthCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 14E3F7CA2B66CB1900FCE5AF /* FirebaseAuthCombine-Community */; };
-		14E3F7CD2B66CB1A00FCE5AF /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 14E3F7CC2B66CB1A00FCE5AF /* FirebaseCrashlytics */; };
+		14E3F7CD2B66CB1A00FCE5AF /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 14E3F7CC2B66CB1A00FCE5AF /* FirebaseCrashlytics */; settings = {ATTRIBUTES = (Required, ); }; };
 		14E3F7CF2B66CB1A00FCE5AF /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 14E3F7CE2B66CB1A00FCE5AF /* FirebaseDatabase */; };
 		14E3F7D12B66CB1A00FCE5AF /* FirebaseDatabaseSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 14E3F7D02B66CB1A00FCE5AF /* FirebaseDatabaseSwift */; };
 		14E3F7D32B66CB1A00FCE5AF /* FirebaseDynamicLinks in Frameworks */ = {isa = PBXBuildFile; productRef = 14E3F7D22B66CB1A00FCE5AF /* FirebaseDynamicLinks */; };
