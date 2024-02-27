@@ -15,6 +15,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 struct AuctionXApp: App {
     @StateObject var userAuthManager = UserAuthenticationManager()
     @StateObject var userData = UserData()
+    @StateObject var artifactsViewModel = ArtifactsViewModel()
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     init() {
         let appearance = UITabBarAppearance()
@@ -36,6 +37,7 @@ struct AuctionXApp: App {
             ContentView()
                 .environmentObject(userData)
                 .environmentObject(userAuthManager)
+                .environmentObject(artifactsViewModel)
         }
     }
 }

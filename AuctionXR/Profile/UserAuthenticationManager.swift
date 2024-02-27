@@ -1,13 +1,3 @@
-//
-//  UserAuthenticationManager.swift
-//  AuctionX
-//
-//  Created by Abdulwadud Abdulkadir on 1/27/24.
-//
-
-
-// UserAuthenticationManager.swift
-
 import FirebaseAuth
 import FirebaseFirestore
 import Combine
@@ -35,7 +25,8 @@ class UserAuthenticationManager: ObservableObject {
             if let document = document, document.exists {
                 let username = document.get("username") as? String ?? "Unknown"
                 DispatchQueue.main.async {
-                    self.userData.updateUserDetails(email: user.email ?? "", username: username)
+                    // Include the user's ID in updateUserDetails
+                    self.userData.updateUserDetails(userId: user.uid, email: user.email ?? "", username: username)
                     // Ensure userImage is nil for new users
                     self.userData.userImage = nil
                     self.appState = .loggedIn
@@ -43,7 +34,8 @@ class UserAuthenticationManager: ObservableObject {
             } else {
                 // User details not found - treat as a new user
                 DispatchQueue.main.async {
-                    self.userData.updateUserDetails(email: user.email ?? "", username: "")
+                    // Include the user's ID in updateUserDetails
+                    self.userData.updateUserDetails(userId: user.uid, email: user.email ?? "", username: "")
                     self.userData.userImage = nil
                     self.appState = .loggedIn
                 }

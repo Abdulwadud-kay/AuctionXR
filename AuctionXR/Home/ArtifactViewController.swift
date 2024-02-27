@@ -6,10 +6,14 @@ import SwiftUI
 import FirebaseFirestore
 
 struct ArtifactViewController: View {
+    @ObservedObject var viewModel = ArtifactsViewModel()
     @State private var isShowingCreateArtifactView = false
-    @State private var artifacts: [ArtifactsView] = [] // Array to store real artifacts
+    @State private var artifacts: [ArtifactsData] = [] // Array to store real artifacts
     @State private var selectedTab: ArtifactTab = .notBidded
-
+    @EnvironmentObject var userAuthManager: UserAuthenticationManager
+    var actualUserID: String {
+            userAuthManager.userData.userId
+        }
     // Enum to manage the tabs for artifact categories
     enum ArtifactTab {
         case bidded, notBidded
@@ -37,7 +41,7 @@ struct ArtifactViewController: View {
                         // Filter and display artifacts based on selected tab
                         // Backend Developer: Fetch and filter artifact data from Firestore based on isBidded property
                         ForEach(artifacts.filter { $0.isBidded == (selectedTab == .bidded) }, id: \.id) { artifact in
-                            ArtifactSummaryView(artifact: artifact)
+                            ArtifactSummaryView(viewModel: viewModel,artifact: artifact)
                                 .padding()
                                 .background(detailBoxColor)
                                 .cornerRadius(10)
@@ -49,8 +53,8 @@ struct ArtifactViewController: View {
             .navigationBarTitle("My Artifacts", displayMode: .inline)
             .navigationBarItems(trailing: navigationBarTrailingItem)
             .sheet(isPresented: $isShowingCreateArtifactView) {
-                // CreateArtifactView presented as a sheet for adding new artifacts
-                CreateArtifactView()
+                // Replace "currentUser" with the actual user ID from Firebase
+                CreateArtifactView(isShowingCreateArtifactView: $isShowingCreateArtifactView, userId: actualUserID)
             }
             .onAppear(perform: loadArtifacts) // Load artifacts when view appears
         }
@@ -79,8 +83,8 @@ struct ArtifactViewController: View {
     }
 }
 
-struct ArtifactViewController_Previews: PreviewProvider {
-    static var previews: some View {
-        ArtifactViewController()
-    }
-}
+//struct ArtifactViewController_Previews: PreviewProvider {
+//    static var previews: some View {
+//        ArtifactViewController()
+//    }
+//}

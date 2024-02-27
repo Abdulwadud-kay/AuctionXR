@@ -8,20 +8,20 @@ struct HomeViewController: View {
     let centerColor = Color.white
     let tabTitles = ["All", "Art", "Science", "Collections", "Special"]
     @EnvironmentObject var userAuthManager: UserAuthenticationManager
-
+    @EnvironmentObject var artifactsViewModel: ArtifactsViewModel // Make sure this is provided in the environment
+    
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
                 ZStack {
                     headerFooterColor
-                        .frame(height: 130)  // Reduced height
+                        .frame(height: 130)
                         .edgesIgnoringSafeArea(.top)
-
-                    VStack(spacing: 45) {  // Increased spacing
-                        HStack(spacing:0) {
-                            Button(action: {
-                                isShowingProfileView = true
-                            }) {
+                    
+                    VStack(spacing: 80) {
+                        HStack(spacing: 0) {
+                            // Profile Button
+                            Button(action: { isShowingProfileView = true }) {
                                 Image(systemName: "person.crop.circle")
                                     .resizable()
                                     .frame(width: 30, height: 30)
@@ -30,10 +30,11 @@ struct HomeViewController: View {
                             .sheet(isPresented: $isShowingProfileView) {
                                 ProfileView().environmentObject(userAuthManager)
                             }
-                            .padding(.leading, 10)
-
+                            .padding(.leading, 15)
+                            
                             Spacer()
-
+                            
+                            // Search Bar
                             HStack {
                                 Image(systemName: "magnifyingglass")
                                     .foregroundColor(.black)
@@ -44,9 +45,10 @@ struct HomeViewController: View {
                             }
                             .background(RoundedRectangle(cornerRadius: 30).fill(Color.white))
                             .frame(height: 100)
-
+                            
                             Spacer()
-
+                            
+                            // Cart Navigation
                             NavigationLink(destination: SoldItemsView()) {
                                 VStack {
                                     Image(systemName: "cart")
@@ -61,42 +63,68 @@ struct HomeViewController: View {
                             .padding(.vertical, 6)
                         }
                         .frame(height: 0)
-                        .padding(.top, 100)  // Adjust padding to lower the elements
-
+                        .padding(.top, 130)
+                        
+                        // Category Picker
                         Picker("Categories", selection: $selectedTabIndex) {
                             ForEach(0..<tabTitles.count, id: \.self) { index in
                                 Text(self.tabTitles[index]).tag(index)
                             }
                         }
                         .pickerStyle(SegmentedPickerStyle())
-                        .padding(.horizontal)  // Add horizontal padding
+                        .padding(.horizontal)
                     }
                 }
-
-                TabView(selection: $selectedTabIndex) {
-                    ForEach(0..<tabTitles.count, id: \.self) { index in
-                        Text("Content for \(tabTitles[index])")
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .background(centerColor)
-                            .tag(index)
-                    }
-                }
-                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-                .frame(height: 300)
+                .padding(.vertical)
+                .padding(.bottom, 700)
                 
-                Spacer()
+                // Tab View for Artifact Categories
+                //                TabView(selection: $selectedTabIndex) {
+                //                    ForEach(0..<tabTitles.count, id: \.self) { index in
+                //                        if filteredArtifacts.isEmpty {
+                //                            Text("No artifacts available")
+                //                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                //                        } else {
+                //                            ArtifactsListView(viewModel: artifactsViewModel, artifacts: filteredArtifacts)
+                //                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                //                        }
+                //                            .background(centerColor)
+                //                            .tag(index)
+                //                    }
+                //                }
+                //                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+//                                .frame(height: 300)
+                //
+//                Spacer()
             }
+            .background(RoundedRectangle(cornerRadius: 30).fill(Color.white))
+            .frame(height: 40)
             .edgesIgnoringSafeArea(.all)
+        
+            }
+        }
+        
+        // Computed property for filtered artifacts
+        var filteredArtifacts: [ArtifactsData] {
+            let filteredByCategory = artifactsViewModel.artifacts.filter { artifact in
+                selectedTabIndex == 0 || artifact.category == tabTitles[selectedTabIndex].lowercased()
+            }
+            
+            if searchText.isEmpty {
+                return filteredByCategory
+            } else {
+                return filteredByCategory.filter { artifact in
+                    artifact.title.lowercased().contains(searchText.lowercased())
+                }
+            }
         }
     }
-}
+
 
 struct HomeViewController_Previews: PreviewProvider {
     static var previews: some View {
-        HomeViewController().environmentObject(UserAuthenticationManager())
+        HomeViewController()
+            .environmentObject(UserAuthenticationManager())
+            .environmentObject(ArtifactsViewModel())
     }
 }
-
-
-
-

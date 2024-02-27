@@ -5,42 +5,82 @@
 //  Created by Abdulwadud Abdulkadir on 1/8/24.
 //
 
-import Foundation
 import SwiftUI
 
+
 struct ArtifactSummaryView: View {
-    var artifact: ArtifactsView
-    var body: some View {
-        NavigationLink(destination: ArtifactDetailView(artifact: artifact)) {
+    @ObservedObject var viewModel: ArtifactsViewModel
+    var artifact: ArtifactsData
+    @State private var isNavigationActive = false
+    
+        var body: some View {
             VStack {
-                Image(artifact.imageName)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .cornerRadius(10)
+                Button(action: {
+                self.isNavigationActive = true
+            }) {
+                ZStack(alignment: .bottomTrailing) {
+                    Image(uiImage: UIImage(contentsOfFile: artifact.imageURL.path) ?? UIImage())
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: UIScreen.main.bounds.width / 2 - 30, height: 200)
+                        .cornerRadius(10)
+                        .shadow(color: .gray, radius: 4, x: 0, y: 2)
+
+                                
+            CountdownTimerView(endTime: artifact.bidEndTime)
+            .padding([.bottom, .trailing], 10)
+        }
+    }
+                        
+        NavigationLink(destination: ArtifactDetailView(viewModel: viewModel, artifact: artifact), isActive: $isNavigationActive) {
+                            EmptyView()
+                        }
+                        .hidden()
+
+
                 Text(artifact.title)
+                    .font(.headline)
                     .fontWeight(.bold)
+                    .padding(.top, 2)
+
                 Text("Current Bid: $\(artifact.currentBid, specifier: "%.2f")")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .padding(.bottom, 2)
+
                 HStack {
-                    ForEach(0..<5) { _ in
+                    ForEach(0..<Int(artifact.rating.rounded()), id: \.self) { _ in
                         Image(systemName: "star.fill")
                             .foregroundColor(.yellow)
                     }
-                    Spacer()
-                    Image(systemName: "hand.thumbsup")
-                    Text("\(artifact.likes)")
-                    Image(systemName: "hand.thumbsdown")
-                    Text("\(artifact.dislikes)")
-                    Image(systemName: "message")
-                    Text("\(artifact.comments)")
                 }
+                .padding(.all, 10)
+                .cornerRadius(10)
+                .frame(width: UIScreen.main.bounds.width / 2 - 20)
             }
-            .padding()
-            .background(Color.white)
-            .cornerRadius(10)
-            .shadow(radius: 5)
         }
     }
+
+
+
+
+struct ArtifactSummaryView_Previews: PreviewProvider {
+    static var previews: some View {
+        let viewModel = ArtifactsViewModel() // Ensure this is initialized correctly
+        // Fetch data or provide sample data for preview
+        viewModel.fetchArtifacts() // Assuming this works synchronously for preview
+
+        return HStack {
+            if viewModel.artifacts.count > 1 {
+                ArtifactSummaryView(viewModel: viewModel, artifact: viewModel.artifacts[0])
+                ArtifactSummaryView(viewModel: viewModel, artifact: viewModel.artifacts[1])
+            }
+        }
+        .padding(.horizontal)
+        .previewLayout(.sizeThatFits)
+    }
 }
+
 
 //struct ArtifactSummaryView_Previews: PreviewProvider {
 //    static var previews: some View {

@@ -72,18 +72,18 @@ struct PhotoPicker: UIViewControllerRepresentable {
         }
 
         func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-            parent.selectedImages.removeAll()
-            
             for result in results {
                 result.itemProvider.loadObject(ofClass: UIImage.self) { (image, error) in
                     if let image = image as? UIImage {
                         DispatchQueue.main.async {
-                            self.parent.selectedImages.append(image)
+                            // Check if the image is not already in the array before appending
+                            if !self.parent.selectedImages.contains(image) {
+                                self.parent.selectedImages.append(image)
+                            }
                         }
                     }
                 }
             }
-
             picker.dismiss(animated: true)
         }
     }

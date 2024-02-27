@@ -10,12 +10,14 @@ class UserData: ObservableObject {
     @Published var userEmail: String = ""
     @Published var isLoggedIn: Bool = false
     @Published var username: String = ""
+    @Published var userId: String = ""
 
     var userInitial: String {
         username.isEmpty ? "" : String(username.prefix(1)).uppercased()
     }
 
-    func updateUserDetails(email: String, username: String) {
+    func updateUserDetails(userId: String,email: String, username: String) {
+        self.userId = userId
         self.userEmail = email
         self.username = username
     }
