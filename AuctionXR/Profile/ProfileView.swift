@@ -9,8 +9,9 @@ struct ProfileView: View {
     @State private var isEditingProfile = false
     @State private var isLoggingOut = false
     @State private var newUsername: String = ""
+    @Environment(\.presentationMode) var presentationMode
 
-    var body: some View {
+var body: some View {
         NavigationView {
             List {
                 VStack {
@@ -19,7 +20,7 @@ struct ProfileView: View {
                         usernameField
                         Spacer()
                     }.padding()
-                }.listRowBackground(Color("f4e9dc"))
+                }.listRowBackground(Color(hex:"f4e9dc"))
                 generalSection
                 informationSection
             }
@@ -28,11 +29,22 @@ struct ProfileView: View {
             .navigationBarItems(trailing: editButton)
             .alert(isPresented: $isLoggingOut, content: logoutAlert)
             .sheet(isPresented: $isImagePickerPresented) {
-                ImagePicker(selectedImage: $userAuthManager.userData.userImage, sourceType: .photoLibrary)
+                ImagePicker(selectedImage: $userAuthManager.userData.userImage, sourceType: .photoLibrary) { image in
+                    if let image = image {
+                        userAuthManager.userData.userImage = image
+                        saveProfileChanges()
+                    }
+                }
+            }
+            .onChange(of: userAuthManager.appState) { appState in
+                if appState == .loggedOut {
+                    // User is logged out, handle accordingly (e.g., show login screen)
+                    // For now, we'll just dismiss the profile view
+                    presentationMode.wrappedValue.dismiss()
+                }
             }
         }
     }
-
     private var profileImage: some View {
         ZStack {
             if let image = userAuthManager.userData.userImage {
@@ -123,24 +135,23 @@ struct ProfileView: View {
     }
 
     private func saveProfileChanges() {
-        // Save the new username
-        if !newUsername.isEmpty {
-            updateUsernameInFirestore(newUsername)
-        }
+            // Save the new username
+            if !newUsername.isEmpty {
+                updateUsernameInFirestore(newUsername)
+            }
 
-        // Save the new image
-        if let newImage = userAuthManager.userData.userImage {
-            userAuthManager.userData.uploadProfileImage(newImage) { result in
-                switch result {
-                case .success(let imageUrl):
-                    self.updateImageUrlInFirestore(imageUrl)
-                case .failure(let error):
-                    print("Error uploading image: \(error.localizedDescription)")
+            // Save the new image
+            if let newImage = userAuthManager.userData.userImage {
+                userAuthManager.userData.uploadProfileImage(newImage) { result in
+                    switch result {
+                    case .success(let imageUrl):
+                        self.updateImageUrlInFirestore(imageUrl)
+                    case .failure(let error):
+                        print("Error uploading image: \(error.localizedDescription)")
+                    }
                 }
             }
         }
-    }
-
     private func updateUsernameInFirestore(_ newUsername: String) {
         let db = Firestore.firestore()
         if let userId = Auth.auth().currentUser?.uid {

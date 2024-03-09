@@ -8,7 +8,7 @@
 import Foundation
 
 
-enum AppState {
+enum AppState: Equatable {
     case initial
     case loggedIn
     case loggedOut

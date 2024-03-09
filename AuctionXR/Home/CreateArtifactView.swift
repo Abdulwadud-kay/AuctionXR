@@ -1,6 +1,4 @@
-
 import SwiftUI
-import PhotosUI
 import FirebaseStorage
 import FirebaseFirestore
 import AVKit
@@ -13,25 +11,24 @@ struct CreateArtifactView: View {
     @State private var acceptTerms: Bool = false
     @State private var selectedImages: [UIImage] = []
     @State private var selectedVideoURL: URL?
-    @State private var showImagePicker: Bool = false
     @State private var showVideoPicker: Bool = false
     @State private var bidEndDate: Date = Date()
     @State private var minBidEndDate: Date = Date().addingTimeInterval(30 * 60)
     @State private var maxBidEndDate: Date = Calendar.current.date(byAdding: .year, value: 2, to: Date())!
     @State private var isSaveBlinking = false
     @State private var isBlinking = false
+    @State private var showImagePicker: Bool = false
     @Binding var isShowingCreateArtifactView: Bool
     
-    let userId: String// 2 years from now
-    
+    let userId: String // 2 years from now
     
     let minBidDuration: TimeInterval = 30 * 60 // 30 minutes in seconds
     let maxBidDuration: TimeInterval = 2 * 365 * 24 * 60 * 60 // 2 years in seconds
     let bidEndDateRange: ClosedRange<Date> = Date()...(Date() + 2 * 365 * 24 * 60 * 60) // From now to 2 years in the future
     
-    let backgroundColor = Color(hex: "dbb88e") // Ensure you have a method to initialize Color with hex.
+    let backgroundColor = Color(hex:"dbb88e") // Ensure you have a method to initialize Color with hex.
     let  iconColor = Color(.white)
-    let gradientTop = Color(hex: "dbb88e")
+    let gradientTop = Color(hex:"dbb88e")
     let gradientBottom = Color.white
     
     var body: some View {
@@ -128,9 +125,6 @@ struct CreateArtifactView: View {
                 }
                 .padding()
                 
-                
-                
-                
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack {
                         ForEach(selectedImages.indices, id: \.self) { index in
@@ -156,7 +150,6 @@ struct CreateArtifactView: View {
                 .frame(height: 120)
                 .padding(.vertical)
                 
-                
                 if let selectedVideoURL = selectedVideoURL {
                     VideoPlayer(player: AVPlayer(url: selectedVideoURL))
                         .frame(height: 200)
@@ -178,35 +171,31 @@ struct CreateArtifactView: View {
                             isSaveBlinking.toggle() // Toggle blink state
                             saveDraft()
                         }
-                            
-                    Button("Submit") {
-                                submitArtifact()
-                                
-                            }
-                            .disabled(!isFormComplete)
-                            .padding()
-                            .frame(width: 100, height: 40)
-                            .background(backgroundColor)
-                            .cornerRadius(25)
-                            .foregroundColor(.white)
-                            .opacity(isBlinking ? 0.0 : 1.0) // Apply blinking effect
-                        }
-                        .padding([.horizontal, .bottom])
-                        .padding(.top, -10)
                     
-                
+                    Button("Submit") {
+                        submitArtifact()
+                    }
+                    .disabled(!isFormComplete)
+                    .padding()
+                    .frame(width: 100, height: 40)
+                    .background(backgroundColor)
+                    .cornerRadius(25)
+                    .foregroundColor(.white)
+                    .opacity(isBlinking ? 0.0 : 1.0) // Apply blinking effect
+                }
+                .padding([.horizontal, .bottom])
+                .padding(.top, -10)
             }
             .background(LinearGradient(gradient: Gradient(colors: [gradientTop, gradientBottom]), startPoint: .top, endPoint: .bottom).edgesIgnoringSafeArea(.all))
             .sheet(isPresented: $showImagePicker) {
-                PhotoPicker(selectedImages: $selectedImages, limit: 4 - selectedImages.count) // Adjust the limit based on already selected images
+                MultiImagePicker(selectedImages: $selectedImages)
             }
+            
             .sheet(isPresented: $showVideoPicker) {
                 VideoPicker(selectedVideoURL: $selectedVideoURL)
             }
         }
     }
-    
-    
     
     private var isFormComplete: Bool {
         !title.isEmpty && !description.isEmpty && !startingPrice.isEmpty && selectedCategory != "Select Category" && acceptTerms && (!selectedImages.isEmpty || selectedVideoURL != nil)

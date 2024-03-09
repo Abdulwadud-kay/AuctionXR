@@ -2,53 +2,51 @@ import Firebase
 import SwiftUI
 
 class ArtifactsViewModel: ObservableObject {
-    @Published var artifacts = [ArtifactsData]()
+    @Published var artifacts: [ArtifactsData]? = []
+
 
     init() {
         fetchArtifacts()
     }
 
     func fetchArtifacts() {
+        fetchData(from: "posts")
+    }
+
+    func fetchDrafts() {
+        fetchData(from: "drafts")
+    }
+
+    private func fetchData(from collection: String) {
         let db = Firestore.firestore()
-        db.collection("posts").getDocuments { (snapshot, error) in
+        db.collection(collection).getDocuments { [weak self] (snapshot, error) in
+            guard let self = self else { return }
+            
             if let error = error {
-                print("Error getting documents: \(error)")
+                print("Error fetching \(collection): \(error)")
                 return
             }
-
+            
             guard let documents = snapshot?.documents else {
-                print("No documents")
+                print("No \(collection) documents found")
                 return
             }
-
-            documents.forEach { doc in
+            
+            documents.forEach { document in
                 do {
-                    // Convert the document data to JSON Data
-                    let jsonData = try JSONSerialization.data(withJSONObject: doc.data(), options: [])
-                    // Decode the JSON data to an ArtifactsData object
-                    var artifact = try JSONDecoder().decode(ArtifactsData.self, from: jsonData)
-
-                    // Fetch likes and dislikes counts
-                    let group = DispatchGroup()
-
-                    group.enter()
-                    doc.reference.collection("likes").getDocuments { snapshot, _ in
-                        artifact.likes = snapshot?.documents.map { $0.documentID } ?? []
-                        group.leave()
-                    }
-
-                    group.enter()
-                    doc.reference.collection("dislikes").getDocuments { snapshot, _ in
-                        artifact.dislikes = snapshot?.documents.map { $0.documentID } ?? []
-                        group.leave()
-                    }
-
-
-                    group.notify(queue: .main) {
-                        // Calculate star rating based on price
-                        artifact.rating = self.calculateStarRating(from: artifact.currentBid)
-
-                        self.artifacts.append(artifact)
+                    if let artifact = try? document.data(as: ArtifactsData.self) {
+                        // Fetch likes and dislikes counts
+                        self.fetchLikesAndDislikes(for: document.reference) { likes, dislikes in
+                            if let artifactIndex = self.artifacts?.firstIndex(where: { $0.id == artifact.id }) {
+                                self.artifacts?[artifactIndex].likes = likes
+                                self.artifacts?[artifactIndex].dislikes = dislikes
+                                self.artifacts?[artifactIndex].rating = self.calculateStarRating(from: artifact.currentBid)
+                            } else {
+                                print("Artifact with ID \(artifact.id) not found in artifacts")
+                            }
+                        }
+                    } else {
+                        print("Document \(document.documentID) does not contain valid data")
                     }
                 } catch {
                     print("Error decoding document: \(error)")
@@ -56,42 +54,65 @@ class ArtifactsViewModel: ObservableObject {
             }
         }
     }
+
+    private func fetchLikesAndDislikes(for reference: DocumentReference, completion: @escaping ([String], [String]) -> Void) {
+        let group = DispatchGroup()
+
+        var likes: [String] = []
+        var dislikes: [String] = []
+
+        group.enter()
+        reference.collection("likes").getDocuments { snapshot, error in
+            defer { group.leave() }
+            if let error = error {
+                print("Error fetching likes: \(error)")
+            } else {
+                likes = snapshot?.documents.map { $0.documentID } ?? []
+            }
+        }
+
+        group.enter()
+        reference.collection("dislikes").getDocuments { snapshot, error in
+            defer { group.leave() }
+            if let error = error {
+                print("Error fetching dislikes: \(error)")
+            } else {
+                dislikes = snapshot?.documents.map { $0.documentID } ?? []
+            }
+        }
+
+        group.notify(queue: .main) {
+            completion(likes, dislikes)
+        }
+    }
+
     func calculateStarRating(from price: Double) -> Double {
         // Example: Every 100 increases the rating by 1 star, allowing fractional values
         return min(max(0.5, price / 100), 5)
     }
 
-        
-        func updateLike(for artifactID: String, userID: String) {
-            // Path to the specific artifact in Firestore
-            let artifactRef = Firestore.firestore().collection("posts").document(artifactID)
-
-            // Check if the user has already liked this artifact
-            artifactRef.collection("likes").document(userID).getDocument { (document, error) in
-                if let document = document, document.exists {
-                    // User has already liked, so unlike it
-                    artifactRef.collection("likes").document(userID).delete()
-                } else {
-                    // User has not liked, so add like
-                    artifactRef.collection("likes").document(userID).setData(["liked": true])
-                    // Optionally, remove dislike if existed
-                    artifactRef.collection("dislikes").document(userID).delete()
-                }
-            }
-        }
-
-        func updateDislike(for artifactID: String, userID: String) {
-            let artifactRef = Firestore.firestore().collection("posts").document(artifactID)
-
-            artifactRef.collection("dislikes").document(userID).getDocument { (document, error) in
-                if let document = document, document.exists {
-                    artifactRef.collection("dislikes").document(userID).delete()
-                } else {
-                    artifactRef.collection("dislikes").document(userID).setData(["disliked": true])
-                    artifactRef.collection("likes").document(userID).delete()
-                }
-            }
-        }
-
+    func updateLike(for artifactID: String, userID: String) {
+        updateReaction(type: "likes", artifactID: artifactID, userID: userID)
     }
 
+    func updateDislike(for artifactID: String, userID: String) {
+        updateReaction(type: "dislikes", artifactID: artifactID, userID: userID)
+    }
+
+    private func updateReaction(type: String, artifactID: String, userID: String) {
+        let artifactRef = Firestore.firestore().collection("posts").document(artifactID)
+
+        artifactRef.collection(type).document(userID).getDocument { (document, error) in
+            if let document = document, document.exists {
+                artifactRef.collection(type).document(userID).delete()
+            } else {
+                artifactRef.collection(type).document(userID).setData([type == "likes" ? "liked" : "disliked": true])
+                if type == "likes" {
+                    artifactRef.collection("dislikes").document(userID).delete()
+                } else {
+                    artifactRef.collection("likes").document(userID).delete()
+                }
+            }
+        }
+    }
+}

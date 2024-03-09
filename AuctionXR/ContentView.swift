@@ -63,7 +63,7 @@ struct MainTabView: View {
                 .tag(2)
         }
         .onAppear {
-            UITabBar.appearance().backgroundColor = UIColor(Color("f4e9dc"))
+            UITabBar.appearance().backgroundColor = UIColor(Color(hex:"f4e9dc"))
         }
     }
 }

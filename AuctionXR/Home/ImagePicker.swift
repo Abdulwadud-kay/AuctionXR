@@ -1,18 +1,11 @@
-//
-//  ImagePicker.swift
-//  AuctionX
-//
-//  Created by Abdulwadud Abdulkadir on 1/21/24.
-//
-
 import Foundation
 import SwiftUI
 import UIKit
 
 struct ImagePicker: UIViewControllerRepresentable {
     @Binding var selectedImage: UIImage?
-    @Environment(\.presentationMode) var presentationMode
-    var sourceType: UIImagePickerController.SourceType
+    let sourceType: UIImagePickerController.SourceType
+    let completionHandler: (UIImage?) -> Void
 
     func makeUIViewController(context: Context) -> UIImagePickerController {
         let imagePicker = UIImagePickerController()
@@ -37,8 +30,14 @@ struct ImagePicker: UIViewControllerRepresentable {
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
             if let image = info[.originalImage] as? UIImage {
                 parent.selectedImage = image
+                parent.completionHandler(image)
+            } else {
+                parent.completionHandler(nil)
             }
-            parent.presentationMode.wrappedValue.dismiss()
+        }
+
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            parent.completionHandler(nil)
         }
     }
 }

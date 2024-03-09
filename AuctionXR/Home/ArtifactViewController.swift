@@ -21,8 +21,8 @@ struct ArtifactViewController: View {
 
     // Custom colors for UI elements
     let infoBoxColor = Color.gray.opacity(0.2)
-    let buttonColor = Color(hex: "dbb88e")
-    let detailBoxColor = Color(hex: "f4e9dc")
+    let buttonColor = Color(hex:"dbb88e")
+    let detailBoxColor = Color(hex:"f4e9dc")
 
     var body: some View {
         NavigationView {
