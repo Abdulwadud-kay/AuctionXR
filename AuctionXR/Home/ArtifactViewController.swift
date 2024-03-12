@@ -1,7 +1,3 @@
-
-
-
-
 import SwiftUI
 import FirebaseFirestore
 
@@ -11,19 +7,21 @@ struct ArtifactViewController: View {
     @State private var artifacts: [ArtifactsData] = [] // Array to store real artifacts
     @State private var selectedTab: ArtifactTab = .notBidded
     @EnvironmentObject var userAuthManager: UserAuthenticationManager
+    
+    // Custom colors for UI elements
+    let infoBoxColor = Color.gray.opacity(0.2)
+    let buttonColor = Color(hex: "dbb88e")
+    let detailBoxColor = Color(hex: "f4e9dc")
+    
     var actualUserID: String {
-            userAuthManager.userData.userId
-        }
+        userAuthManager.userData.userId
+    }
+    
     // Enum to manage the tabs for artifact categories
     enum ArtifactTab {
         case bidded, notBidded
     }
-
-    // Custom colors for UI elements
-    let infoBoxColor = Color.gray.opacity(0.2)
-    let buttonColor = Color(hex:"dbb88e")
-    let detailBoxColor = Color(hex:"f4e9dc")
-
+    
     var body: some View {
         NavigationView {
             VStack {
@@ -34,17 +32,24 @@ struct ArtifactViewController: View {
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .padding()
-
+                
                 // Scroll view to display artifacts based on selected tab
                 ScrollView {
                     VStack(alignment: .leading) {
                         // Filter and display artifacts based on selected tab
                         // Backend Developer: Fetch and filter artifact data from Firestore based on isBidded property
                         ForEach(artifacts.filter { $0.isBidded == (selectedTab == .bidded) }, id: \.id) { artifact in
-                            ArtifactSummaryView(viewModel: viewModel,artifact: artifact)
-                                .padding()
-                                .background(detailBoxColor)
-                                .cornerRadius(10)
+                            if selectedTab == .bidded {
+                                ArtifactSummaryView(viewModel: viewModel, artifact: artifact)
+                                    .padding()
+                                    .background(detailBoxColor)
+                                    .cornerRadius(10)
+                            } else {
+                                ArtifactDraftView(viewModel: viewModel, artifact: artifact)
+                                    .padding()
+                                    .background(detailBoxColor)
+                                    .cornerRadius(10)
+                            }
                         }
                     }
                 }
@@ -59,7 +64,7 @@ struct ArtifactViewController: View {
             .onAppear(perform: loadArtifacts) // Load artifacts when view appears
         }
     }
-
+    
     private var navigationBarTrailingItem: some View {
         // Button to show the view for creating a new artifact
         Button(action: {
@@ -76,15 +81,20 @@ struct ArtifactViewController: View {
             .cornerRadius(10)
         }
     }
-
+    
     private func loadArtifacts() {
         // Backend Developer: Implement function to fetch artifact data from Firestore
-        // Update the 'artifacts' array with the fetched data
+        // Fetch artifacts based on selected tab and user ID
+        let userID = actualUserID // Assuming you have the actualUserID property defined
+        
+        if selectedTab == .bidded {
+            viewModel.fetchArtifacts(userID: userID)
+        } else {
+            viewModel.fetchDrafts(userID: userID)
+        }
     }
 }
 
-//struct ArtifactViewController_Previews: PreviewProvider {
-//    static var previews: some View {
-//        ArtifactViewController()
-//    }
-//}
+
+
+

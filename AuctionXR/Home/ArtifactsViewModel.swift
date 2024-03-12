@@ -6,18 +6,20 @@ class ArtifactsViewModel: ObservableObject {
 
 
     init() {
-        fetchArtifacts()
+        fetchArtifacts(userID: "")
     }
 
-    func fetchArtifacts() {
-        fetchData(from: "posts")
+    func fetchArtifacts(userID: String) {
+        fetchData(from: "posts", userID: userID)
     }
 
-    func fetchDrafts() {
-        fetchData(from: "drafts")
+    func fetchDrafts(userID: String) {
+        fetchData(from: "drafts", userID: userID)
     }
 
-    private func fetchData(from collection: String) {
+
+
+    private func fetchData(from collection: String, userID: String) {
         let db = Firestore.firestore()
         db.collection(collection).getDocuments { [weak self] (snapshot, error) in
             guard let self = self else { return }

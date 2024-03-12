@@ -11,21 +11,22 @@ import SwiftUI
 struct ArtifactSummaryView: View {
     @ObservedObject var viewModel: ArtifactsViewModel
     var artifact: ArtifactsData
-    @State private var isNavigationActive = false
+    @State private var currentImageIndex = 0
+    let timer = Timer.publish(every: 900, on: .main, in: .common).autoconnect() // 900 seconds = 15 minutes
     
     var body: some View {
         VStack {
-            NavigationLink(destination: ArtifactDetailView(viewModel: viewModel, artifact: artifact), isActive: $isNavigationActive) {
+            NavigationLink(destination: ArtifactDetailView(viewModel: viewModel, artifact: artifact)) {
                 EmptyView()
             }
             .hidden()
             
             Button(action: {
-                self.isNavigationActive = true
+                self.currentImageIndex = (self.currentImageIndex + 1) % artifact.imageURLs.count
             }) {
                 ZStack(alignment: .bottomTrailing) {
                     // Using AsyncImage to load an image from a URL
-                    AsyncImage(url: artifact.imageURL) { image in
+                    AsyncImage(url: artifact.imageURLs[currentImageIndex]) { image in
                         image.resizable()
                     } placeholder: {
                         ProgressView()
@@ -60,30 +61,34 @@ struct ArtifactSummaryView: View {
             .cornerRadius(10)
             .frame(width: UIScreen.main.bounds.width / 2 - 20)
         }
-    }
-}
-
-
-
-
-
-struct ArtifactSummaryView_Previews: PreviewProvider {
-    static var previews: some View {
-        let viewModel = ArtifactsViewModel() // Ensure this is initialized correctly
-        // Fetch data or provide sample data for preview
-        viewModel.fetchArtifacts() // Assuming this works synchronously for preview
-
-        return HStack {
-            if let artifacts = viewModel.artifacts, artifacts.count > 1 {
-                ArtifactSummaryView(viewModel: viewModel, artifact: artifacts[0])
-                ArtifactSummaryView(viewModel: viewModel, artifact: artifacts[1])
-            }
-
+        .onReceive(timer) { _ in
+            self.currentImageIndex = (self.currentImageIndex + 1) % artifact.imageURLs.count
         }
-        .padding(.horizontal)
-        .previewLayout(.sizeThatFits)
     }
 }
+
+
+
+
+
+
+//struct ArtifactSummaryView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        let viewModel = ArtifactsViewModel() // Ensure this is initialized correctly
+//        // Fetch data or provide sample data for preview
+//        viewModel.fetchArtifacts() // Assuming this works synchronously for preview
+//
+//        return HStack {
+//            if let artifacts = viewModel.artifacts, artifacts.count > 1 {
+//                ArtifactSummaryView(viewModel: viewModel, artifact: artifacts[0])
+//                ArtifactSummaryView(viewModel: viewModel, artifact: artifacts[1])
+//            }
+//
+//        }
+//        .padding(.horizontal)
+//        .previewLayout(.sizeThatFits)
+//    }
+//}
 
 
 //struct ArtifactSummaryView_Previews: PreviewProvider {

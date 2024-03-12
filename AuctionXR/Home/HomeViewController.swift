@@ -2,29 +2,29 @@ import SwiftUI
 
 struct HomeViewController: View {
     @State private var isShowingProfileView = false
-    @State private var selectedTabIndex = 0
-    let headerFooterColor = Color(hex:"dbb88e")
+    @State private var searchText = ""
+    let headerColor = Color(hex: "dbb88e")
     let centerColor = Color.white
-    let tabTitles = ["All", "Art", "Science", "Collections", "Special"]
     @EnvironmentObject var userAuthManager: UserAuthenticationManager
-    @EnvironmentObject var artifactsViewModel: ArtifactsViewModel // Make sure this is provided in the environment
-    
+    @ObservedObject var artifactsViewModel = ArtifactsViewModel()
+
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
-                ZStack {
-                    headerFooterColor
-                        .frame(height: 130)
+                // Header
+                VStack(spacing: 0) { // Use VStack to apply headerColor background to the entire header section
+                    headerColor
+                        .frame(height: 90)
                         .edgesIgnoringSafeArea(.top)
                     
-                    VStack(spacing: 80) {
-                        HStack(spacing: 0) {
-                            // Profile Button
+                    // Overlay VStack containing profile icon, search bar, and cart icon
+                    VStack(spacing: 10) {
+                        HStack {
                             // Profile Button
                             Button(action: { isShowingProfileView = true }) {
                                 ZStack {
                                     Circle()
-                                        .fill(Color.gray)
+                                        .fill(Color.clear)
                                         .frame(width: 30, height: 30)
                                     if let image = userAuthManager.userData.userImage {
                                         Image(uiImage: image)
@@ -43,24 +43,29 @@ struct HomeViewController: View {
                                 ProfileView().environmentObject(userAuthManager)
                             }
                             .padding(.leading, 15)
-
+                            
                             Spacer()
-                            Button(action: {
-                                    // Handle search action
-                                }) {
+                            
+                            // Search Bar
+                            RoundedRectangle(cornerRadius: 30)
+                                .fill(Color.white)
+                                .frame(maxWidth: 200, maxHeight: 30) // Set maxWidth to allow extension on both sides
+                                .overlay(
                                     HStack {
                                         Image(systemName: "magnifyingglass")
-                                            .foregroundColor(.white)
-                                            .padding(.trailing, 5)
-                                        Text("Search")
-                                            .foregroundColor(.white)
+                                            .foregroundColor(.black)
+                                            .padding(.leading, 10)
+                                        TextField("Search", text: $searchText) // Use TextField instead of Text
+                                            .foregroundColor(.black)
+                                            .padding(.leading, 5) // Adjust padding as needed
+                                            .padding(.trailing, 5) // Adjust padding as needed
+                                        Spacer()
                                     }
-                                }
+                                )
                                 .padding(.trailing, 10)
-                                .padding(.top, 6)
                                 .padding(.vertical, 6)
-                                
-                                Spacer()
+                            
+                            Spacer()
                             
                             // Cart Navigation
                             NavigationLink(destination: SoldItemsView()) {
@@ -76,30 +81,22 @@ struct HomeViewController: View {
                             .padding(.top, 6)
                             .padding(.vertical, 6)
                         }
-                        .frame(height: 0)
-                        .padding(.top, 130)
-                        
-                        // Category Picker
-                        Picker("Categories", selection: $selectedTabIndex) {
-                            ForEach(0..<tabTitles.count, id: \.self) { index in
-                                Text(self.tabTitles[index]).tag(index)
-                            }
-                        }
-                        .pickerStyle(SegmentedPickerStyle())
-                        .padding(.horizontal)
+                        .padding(.horizontal) // Add horizontal padding for the whole HStack
+                        .cornerRadius(15) // Optional: Add corner radius if needed
+                        .background(Color(headerColor))
                     }
                 }
-                .padding(.vertical)
-                .padding(.bottom, 700)
                 
-                // Tab View for Artifact Categories
-                // Add your TabView here if needed
-                
+                // Space for displaying artifacts
+                ArtifactsListView(artifacts: artifactsViewModel.artifacts ?? [])
+                    .padding(.top, 20) // Adjust spacing as needed
+                    .background(Color.white) // Ensure consistent background color
             }
-            .background(RoundedRectangle(cornerRadius: 30).fill(Color.white))
-            .frame(height: 40)
             .edgesIgnoringSafeArea(.all)
-        
+            .onAppear {
+                // Fetch all artifacts
+                artifactsViewModel.fetchArtifacts(userID: "")
+            }
         }
     }
 }
