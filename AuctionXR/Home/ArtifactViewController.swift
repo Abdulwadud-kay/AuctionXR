@@ -1,5 +1,4 @@
 import SwiftUI
-import FirebaseFirestore
 
 struct ArtifactViewController: View {
     @ObservedObject var viewModel = ArtifactsViewModel()
@@ -7,6 +6,7 @@ struct ArtifactViewController: View {
     @State private var artifacts: [ArtifactsData] = [] // Array to store real artifacts
     @State private var selectedTab: ArtifactTab = .notBidded
     @EnvironmentObject var userAuthManager: UserAuthenticationManager
+    @State private var isLoading = false // Add loading state
     
     // Custom colors for UI elements
     let infoBoxColor = Color.gray.opacity(0.2)
@@ -38,17 +38,23 @@ struct ArtifactViewController: View {
                     VStack(alignment: .leading) {
                         // Filter and display artifacts based on selected tab
                         // Backend Developer: Fetch and filter artifact data from Firestore based on isBidded property
-                        ForEach(artifacts.filter { $0.isBidded == (selectedTab == .bidded) }, id: \.id) { artifact in
-                            if selectedTab == .bidded {
-                                ArtifactSummaryView(viewModel: viewModel, artifact: artifact)
-                                    .padding()
-                                    .background(detailBoxColor)
-                                    .cornerRadius(10)
-                            } else {
-                                ArtifactDraftView(viewModel: viewModel, artifact: artifact)
-                                    .padding()
-                                    .background(detailBoxColor)
-                                    .cornerRadius(10)
+                        if isLoading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: buttonColor))
+                                .padding()
+                        } else {
+                            ForEach(artifacts.filter { $0.isBidded == (selectedTab == .bidded) }, id: \.id) { artifact in
+                                if selectedTab == .bidded {
+                                    ArtifactSummaryView(viewModel: viewModel, artifact: artifact)
+                                        .padding()
+                                        .background(detailBoxColor)
+                                        .cornerRadius(10)
+                                } else {
+                                    ArtifactDraftView(viewModel: viewModel, artifact: artifact)
+                                        .padding()
+                                        .background(detailBoxColor)
+                                        .cornerRadius(10)
+                                }
                             }
                         }
                     }
@@ -83,18 +89,24 @@ struct ArtifactViewController: View {
     }
     
     private func loadArtifacts() {
-        // Backend Developer: Implement function to fetch artifact data from Firestore
+        // Set loading state to true when fetching starts
+        isLoading = true
+        
         // Fetch artifacts based on selected tab and user ID
         let userID = actualUserID // Assuming you have the actualUserID property defined
         
         if selectedTab == .bidded {
-            viewModel.fetchArtifacts(userID: userID)
+            viewModel.fetchArtifacts(userID: userID) { success in
+                // Set isLoading based on the success of fetching
+                isLoading = !success
+            }
         } else {
-            viewModel.fetchDrafts(userID: userID)
+            viewModel.fetchDrafts(userID: userID) { success in
+                // Set isLoading based on the success of fetching
+                isLoading = !success
+            }
         }
+        
+        // No need to set isLoading to false here as it will be set in the completion handler
     }
 }
-
-
-
-

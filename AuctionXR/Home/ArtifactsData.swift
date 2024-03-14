@@ -19,6 +19,7 @@ struct ArtifactsData: Identifiable, Codable {
     var imageURLs: [URL]
     var videoURL: [URL]
     var category: String
+   
 
     // Default initializer
     init(id: UUID = UUID(), title: String, description: String, startingPrice: Double, currentBid: Double, isSold: Bool, likes: [String]? = nil, dislikes: [String]? = nil, currentBidder: String, imageURL: URL, rating: Double,isBidded: Bool, bidEndTime: Date, imageURLs: [URL], videoURL: [URL], category: String) {
@@ -38,5 +39,6 @@ struct ArtifactsData: Identifiable, Codable {
         self.imageURLs = imageURLs
         self.videoURL = videoURL
         self.category = category
+        
     }
 }

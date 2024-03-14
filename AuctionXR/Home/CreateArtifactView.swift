@@ -210,7 +210,7 @@ struct CreateArtifactView: View {
                 "startingPrice": Double(self.startingPrice) ?? 0.0,
                 "bidEndDate": Timestamp(date: self.bidEndDate),
                 "category": self.selectedCategory,
-                "ownerID": self.userId,
+                "userID": self.userId,
                 "timestamp": FieldValue.serverTimestamp()            ]
             
             let db = Firestore.firestore()
@@ -246,7 +246,7 @@ struct CreateArtifactView: View {
                 "startingPrice": Double(self.startingPrice) ?? 0.0,
                 "bidEndDate": Timestamp(date: self.bidEndDate),
                 "category": self.selectedCategory,
-                "ownerID": self.userId,
+                "userID": self.userId,
                 "timestamp": FieldValue.serverTimestamp()
             ]
             

@@ -1,62 +1,90 @@
 import Firebase
+import FirebaseFirestore
 import SwiftUI
 
 class ArtifactsViewModel: ObservableObject {
     @Published var artifacts: [ArtifactsData]? = []
 
 
-    init() {
-        fetchArtifacts(userID: "")
-    }
-
-    func fetchArtifacts(userID: String) {
-        fetchData(from: "posts", userID: userID)
-    }
-
-    func fetchDrafts(userID: String) {
-        fetchData(from: "drafts", userID: userID)
-    }
-
-
-
-    private func fetchData(from collection: String, userID: String) {
-        let db = Firestore.firestore()
-        db.collection(collection).getDocuments { [weak self] (snapshot, error) in
-            guard let self = self else { return }
-            
-            if let error = error {
-                print("Error fetching \(collection): \(error)")
-                return
-            }
-            
-            guard let documents = snapshot?.documents else {
-                print("No \(collection) documents found")
-                return
-            }
-            
-            documents.forEach { document in
-                do {
-                    if let artifact = try? document.data(as: ArtifactsData.self) {
-                        // Fetch likes and dislikes counts
-                        self.fetchLikesAndDislikes(for: document.reference) { likes, dislikes in
-                            if let artifactIndex = self.artifacts?.firstIndex(where: { $0.id == artifact.id }) {
-                                self.artifacts?[artifactIndex].likes = likes
-                                self.artifacts?[artifactIndex].dislikes = dislikes
-                                self.artifacts?[artifactIndex].rating = self.calculateStarRating(from: artifact.currentBid)
-                            } else {
-                                print("Artifact with ID \(artifact.id) not found in artifacts")
-                            }
-                        }
-                    } else {
-                        print("Document \(document.documentID) does not contain valid data")
-                    }
-                } catch {
-                    print("Error decoding document: \(error)")
-                }
-            }
+    func fetchArtifacts(userID: String, completion: @escaping (Bool) -> Void) {
+        print("Fetching artifacts for user: \(userID)")
+        fetchData(from: "posts", userID: userID) { success in
+            print("fetchArtifacts completed: \(success)")
+            completion(success)
         }
     }
 
+    func fetchDrafts(userID: String, completion: @escaping (Bool) -> Void) {
+        print("Fetching drafts for user: \(userID)")
+        fetchData(from: "drafts", userID: userID) { success in
+            print("fetchDrafts completed: \(success)")
+            completion(success)
+        }
+    }
+
+
+
+    func fetchAllArtifacts(completion: @escaping (Bool) -> Void) {
+        print("Fetching all artifacts")
+        fetchData(from: "posts", userID: "") { success in
+            print("fetchAllArtifacts completed: \(success)")
+            completion(success)
+        }
+    }
+
+
+    private func fetchData(from collection: String, userID: String, completion: @escaping (Bool) -> Void) {
+        print("Fetching data from collection: \(collection), userID: \(userID)")
+
+        let db = Firestore.firestore()
+        let collectionRef = db.collection(collection)
+        var query: Query = collectionRef // Assign query as a Query
+
+        if !userID.isEmpty {
+            query = collectionRef.whereField("userId", isEqualTo: userID)
+        }
+
+        query.getDocuments { [weak self] (snapshot, error) in
+            guard let self = self else { return }
+
+            if let error = error {
+                print("Error fetching \(collection): \(error)")
+                completion(false) // Call completion handler with failure
+                return
+            }
+
+            guard let documents = snapshot?.documents else {
+                print("No \(collection) documents found")
+                completion(false) // Call completion handler with failure
+                return
+            }
+
+            print("Fetched \(documents.count) documents from collection: \(collection)")
+
+            // Convert documents to artifacts data
+            self.artifacts = documents.compactMap { document -> ArtifactsData? in
+                do {
+                    var artifact = try document.data(as: ArtifactsData.self)
+
+                    // Fetch likes and dislikes counts
+                    print("Fetching likes and dislikes for artifact: \(artifact)")
+                    self.fetchLikesAndDislikes(for: document.reference) { likes, dislikes in
+                        artifact.likes = likes // Remove optional chaining
+                        artifact.dislikes = dislikes // Remove optional chaining
+                        artifact.rating = self.calculateStarRating(from: artifact.currentBid ?? 0.0) // Remove optional chaining and provide a default value
+                    }
+
+                    return artifact
+                } catch {
+                    print("Error decoding document: \(error)")
+                    return nil
+                }
+            }
+
+            completion(true) // Call completion handler with success
+        }
+    }
+    
     private func fetchLikesAndDislikes(for reference: DocumentReference, completion: @escaping ([String], [String]) -> Void) {
         let group = DispatchGroup()
 

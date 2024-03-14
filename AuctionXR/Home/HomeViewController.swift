@@ -7,6 +7,7 @@ struct HomeViewController: View {
     let centerColor = Color.white
     @EnvironmentObject var userAuthManager: UserAuthenticationManager
     @ObservedObject var artifactsViewModel = ArtifactsViewModel()
+    @State private var isLoading = true // Added isLoading state
 
     var body: some View {
         NavigationView {
@@ -88,14 +89,23 @@ struct HomeViewController: View {
                 }
                 
                 // Space for displaying artifacts
-                ArtifactsListView(artifacts: artifactsViewModel.artifacts ?? [])
-                    .padding(.top, 20) // Adjust spacing as needed
-                    .background(Color.white) // Ensure consistent background color
+                if isLoading { // Check isLoading state
+                    // Show loading indicator
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: headerColor))
+                        .padding(.top, 20)
+                } else {
+                    ArtifactsListView(artifacts: artifactsViewModel.artifacts!)
+                        .padding(.top, 20) // Adjust spacing as needed
+                        .background(Color.white) // Ensure consistent background color
+                }
             }
             .edgesIgnoringSafeArea(.all)
             .onAppear {
                 // Fetch all artifacts
-                artifactsViewModel.fetchArtifacts(userID: "")
+                artifactsViewModel.fetchAllArtifacts { success in
+                    isLoading = !success // Update isLoading based on success of fetching
+                }
             }
         }
     }
