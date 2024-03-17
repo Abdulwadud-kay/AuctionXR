@@ -9,7 +9,7 @@ class ArtifactsViewModel: ObservableObject {
     func fetchArtifacts(userID: String, completion: @escaping (Bool) -> Void) {
         print("Fetching artifacts for user: \(userID)")
         fetchData(from: "posts", userID: userID) { success in
-            print("fetchArtifacts completed: \(success)")
+            print("fetch post completed: \(success)")
             completion(success)
         }
     }
@@ -17,7 +17,7 @@ class ArtifactsViewModel: ObservableObject {
     func fetchDrafts(userID: String, completion: @escaping (Bool) -> Void) {
         print("Fetching drafts for user: \(userID)")
         fetchData(from: "drafts", userID: userID) { success in
-            print("fetchDrafts completed: \(success)")
+            print("fetch Drafts completed: \(success)")
             completion(success)
         }
     }
@@ -145,4 +145,7 @@ class ArtifactsViewModel: ObservableObject {
             }
         }
     }
+    func updateArtifact(_ artifacts: [ArtifactsData]) {
+            self.artifacts = artifacts
+        }
 }

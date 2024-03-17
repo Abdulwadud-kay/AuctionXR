@@ -12,17 +12,16 @@ struct ArtifactsData: Identifiable, Codable {
     var likes: [String]?
     var dislikes: [String]?
     var currentBidder: String
-    var imageURL: URL
     var rating: Double
     var isBidded: Bool
-    var bidEndTime: Date
-    var imageURLs: [URL]
-    var videoURL: [URL]
+    var bidEndDate: Date
+    var imageURLs: [URL?]
+    var videoURL: [URL?]
     var category: String
+    var timestamp: Date?
    
 
-    // Default initializer
-    init(id: UUID = UUID(), title: String, description: String, startingPrice: Double, currentBid: Double, isSold: Bool, likes: [String]? = nil, dislikes: [String]? = nil, currentBidder: String, imageURL: URL, rating: Double,isBidded: Bool, bidEndTime: Date, imageURLs: [URL], videoURL: [URL], category: String) {
+    init(id: UUID = UUID(), title: String, description: String, startingPrice: Double, currentBid: Double, isSold: Bool, likes: [String]? = nil, dislikes: [String]? = nil, currentBidder: String, rating: Double,isBidded: Bool, bidEndDate: Date, imageURLs: [URL?], videoURL: [URL?], category: String, timestamp: Date? = nil) {
         self.id = id
         self.title = title
         self.description = description
@@ -32,13 +31,13 @@ struct ArtifactsData: Identifiable, Codable {
         self.likes = likes
         self.dislikes = dislikes
         self.currentBidder = currentBidder
-        self.imageURL = imageURL
         self.rating = rating
         self.isBidded = isBidded
-        self.bidEndTime = bidEndTime
+        self.bidEndDate = bidEndDate
         self.imageURLs = imageURLs
         self.videoURL = videoURL
         self.category = category
+        self.timestamp = timestamp
         
     }
 }

@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-
 struct ArtifactSummaryView: View {
     @ObservedObject var viewModel: ArtifactsViewModel
     var artifact: ArtifactsData
@@ -26,18 +25,26 @@ struct ArtifactSummaryView: View {
             }) {
                 ZStack(alignment: .bottomTrailing) {
                     // Using AsyncImage to load an image from a URL
-                    AsyncImage(url: artifact.imageURLs[currentImageIndex]) { image in
-                        image.resizable()
-                    } placeholder: {
-                        ProgressView()
+                    if let url = artifact.imageURLs[currentImageIndex] {
+                        AsyncImage(url: url) { image in
+                            image.resizable()
+                        } placeholder: {
+                            ProgressView()
+                        }
+                        .scaledToFit()
+                        .frame(width: UIScreen.main.bounds.width / 2 - 30, height: 200)
+                        .cornerRadius(10)
+                        .shadow(color: .gray, radius: 4, x: 0, y: 2)
+                        
+                        CountdownTimerView(endTime: artifact.bidEndDate)
+                            .padding([.bottom, .trailing], 10)
+                    } else {
+                        Text("Error loading image")
+                            .foregroundColor(.red)
+                            .frame(width: UIScreen.main.bounds.width / 2 - 30, height: 200)
+                            .cornerRadius(10)
+                            .shadow(color: .gray, radius: 4, x: 0, y: 2)
                     }
-                    .scaledToFit()
-                    .frame(width: UIScreen.main.bounds.width / 2 - 30, height: 200)
-                    .cornerRadius(10)
-                    .shadow(color: .gray, radius: 4, x: 0, y: 2)
-                    
-                    CountdownTimerView(endTime: artifact.bidEndTime)
-                        .padding([.bottom, .trailing], 10)
                 }
             }
             
@@ -62,7 +69,7 @@ struct ArtifactSummaryView: View {
             .frame(width: UIScreen.main.bounds.width / 2 - 20)
         }
         .onReceive(timer) { _ in
-            self.currentImageIndex = (self.currentImageIndex + 1) % artifact.imageURLs.count
+            self.currentImageIndex = (self.currentImageIndex + 1) % (artifact.imageURLs.count > 0 ? artifact.imageURLs.count : 1)
         }
     }
 }
@@ -72,27 +79,32 @@ struct ArtifactSummaryView: View {
 
 
 
-//struct ArtifactSummaryView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        let viewModel = ArtifactsViewModel() // Ensure this is initialized correctly
-//        // Fetch data or provide sample data for preview
-//        viewModel.fetchArtifacts() // Assuming this works synchronously for preview
-//
-//        return HStack {
-//            if let artifacts = viewModel.artifacts, artifacts.count > 1 {
-//                ArtifactSummaryView(viewModel: viewModel, artifact: artifacts[0])
-//                ArtifactSummaryView(viewModel: viewModel, artifact: artifacts[1])
-//            }
-//
-//        }
-//        .padding(.horizontal)
-//        .previewLayout(.sizeThatFits)
-//    }
-//}
 
-
-//struct ArtifactSummaryView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        ArtifactSummaryView()
-//    }
-//}
+struct ArtifactSummaryView_Previews: PreviewProvider {
+    static var previews: some View {
+        let viewModel = ArtifactsViewModel()
+        let imageURL = URL(string: "https://example.com/image.jpg")!
+        let videoURL = URL(string: "https://example.com/video.mp4")!
+        let artifact = ArtifactsData(
+            id: UUID(),
+            title: "Sample Artifact",
+            description: "This is a sample artifact",
+            startingPrice: 0.0,
+            currentBid: 100.0,
+            isSold: false,
+            likes: [],
+            dislikes: [],
+            currentBidder: "",
+            rating: 0.0,
+            isBidded: false,
+            bidEndDate: Date(),
+            imageURLs: [imageURL],
+            videoURL: [videoURL],
+            category: "Sample Category",
+            timestamp: Date() // Add the missing parameter
+        )
+        return ArtifactSummaryView(viewModel: viewModel, artifact: artifact)
+            .padding()
+            .previewLayout(.sizeThatFits)
+    }
+}

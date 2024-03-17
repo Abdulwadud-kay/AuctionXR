@@ -27,7 +27,7 @@ struct ArtifactDraftView: View {
                             .cornerRadius(10)
                             .shadow(color: .gray, radius: 4, x: 0, y: 2)
                         
-                        CountdownTimerView(endTime: artifact.bidEndTime)
+                        CountdownTimerView(endTime: artifact.bidEndDate)
                             .padding([.bottom, .trailing], 10)
                     }
                 } else {
@@ -74,20 +74,36 @@ struct ArtifactDraftView: View {
                 }
             } else {
                 // Handle error or use a default image
+                print("Error loading image:", error ?? "Unknown error")
             }
         }.resume()
     }
 }
 
-//struct ArtifactDraftView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        let viewModel = ArtifactsViewModel()
-//        if let artifact = viewModel.artifacts?.first {
-//            ArtifactDraftView(viewModel: viewModel, artifact: artifact)
-//                .padding(.horizontal)
-//                .previewLayout(.sizeThatFits)
-//        } else {
-//            Text("No artifacts available")
-//        }
-//    }
-//}
+// Preview
+struct ArtifactDraftView_Previews: PreviewProvider {
+    static var previews: some View {
+        let viewModel = ArtifactsViewModel()
+        let imageURL = URL(string: "https://example.com/image.jpg")!
+        let videoURL = URL(string: "https://example.com/video.mp4")!
+        let artifact = ArtifactsData(
+            id: UUID(),
+            title: "Sample Artifact",
+            description: "This is a sample artifact",
+            startingPrice: 0.0,
+            currentBid: 100.0,
+            isSold: false,
+            likes: [],
+            dislikes: [],
+            currentBidder: "",
+            rating: 0.0,
+            isBidded: false,
+            bidEndDate: Date(),
+            imageURLs: [imageURL],
+            videoURL: [videoURL],
+            category: "Sample Category",
+            timestamp: Date() // Add the missing parameter
+        )
+        return ArtifactDraftView(viewModel: viewModel, artifact: artifact)
+    }
+}

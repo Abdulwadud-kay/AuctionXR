@@ -69,6 +69,8 @@
 		14E3F7EB2B66CB1A00FCE5AF /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = 14E3F7EA2B66CB1A00FCE5AF /* FirebaseRemoteConfig */; };
 		14E3F7ED2B66CB4200FCE5AF /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 14E3F7EC2B66CB4200FCE5AF /* GoogleService-Info.plist */; };
 		14E3F7F22B66F83200FCE5AF /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 14E3F7F12B66F83200FCE5AF /* FirebaseStorage */; };
+		14E939622BA4B8D7003F3542 /* AccountDetailsView..swift in Sources */ = {isa = PBXBuildFile; fileRef = 14E939612BA4B8D7003F3542 /* AccountDetailsView..swift */; };
+		14E939642BA4BE47003F3542 /* BidView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14E939632BA4BE47003F3542 /* BidView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -110,6 +112,8 @@
 		14E3F7B62B66C77B00FCE5AF /* PreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewView.swift; sourceTree = "<group>"; };
 		14E3F7B92B66C7A600FCE5AF /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		14E3F7EC2B66CB4200FCE5AF /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		14E939612BA4B8D7003F3542 /* AccountDetailsView..swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountDetailsView..swift; sourceTree = "<group>"; };
+		14E939632BA4BE47003F3542 /* BidView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -221,6 +225,8 @@
 				143699762B93D21100222C00 /* ArtifactDraftView.swift */,
 				1466696D2B9903A2005ADF87 /* DraftDetailsView.swift */,
 				1466696F2B9908CE005ADF87 /* MediaCarouselView.swift */,
+				14E939612BA4B8D7003F3542 /* AccountDetailsView..swift */,
+				14E939632BA4BE47003F3542 /* BidView.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -366,6 +372,7 @@
 				14E3F79C2B66C58F00FCE5AF /* ArtifactsData.swift in Sources */,
 				14E3F7B12B66C6D700FCE5AF /* HistoryView.swift in Sources */,
 				14E3F7A72B66C64400FCE5AF /* SettingsView.swift in Sources */,
+				14E939622BA4B8D7003F3542 /* AccountDetailsView..swift in Sources */,
 				14E3F7982B66C54E00FCE5AF /* ArtifactSummaryView.swift in Sources */,
 				14E3F78E2B66C45900FCE5AF /* HomeViewController.swift in Sources */,
 				14E3F7A52B66C62D00FCE5AF /* StateData.swift in Sources */,
@@ -382,6 +389,7 @@
 				14E3F7942B66C50E00FCE5AF /* NotificationView.swift in Sources */,
 				14E3F7AF2B66C6B300FCE5AF /* FAQsView.swift in Sources */,
 				14DAC73C2B7E9DFF0082E558 /* PrimaryButtonStyle.swift in Sources */,
+				14E939642BA4BE47003F3542 /* BidView.swift in Sources */,
 				14DAC73A2B7E9AC30082E558 /* ArtifactsViewModel.swift in Sources */,
 				14E3F77C2B66C35200FCE5AF /* ContentView.swift in Sources */,
 				14E132A02B8176910006B15E /* ArtifactListView.swift in Sources */,

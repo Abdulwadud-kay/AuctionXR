@@ -1,9 +1,4 @@
-
-
 import SwiftUI
-
-
-
 
 struct ArtifactDetailView: View {
     @ObservedObject var viewModel: ArtifactsViewModel
@@ -13,19 +8,16 @@ struct ArtifactDetailView: View {
     
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 16) {
                 MediaCarouselView(images: artifact.imageURLs, videos: artifact.videoURL)
                     .frame(height: 300)
                     .cornerRadius(10)
                     .shadow(radius: 5)
 
-                CountdownTimerView(endTime: artifact.bidEndTime)
+                CountdownTimerView(endTime: artifact.bidEndDate)
                     .padding(.vertical)
-                
-                
+
                 HStack {
-                    
-                    
                     Text(artifact.title)
                         .font(.headline)
                         .fontWeight(.bold)
@@ -36,33 +28,22 @@ struct ArtifactDetailView: View {
                             .foregroundColor(.black)
                     }
                     .padding(.trailing, 10)
-                    .actionSheet(isPresented: $showOptions) {
-                        ActionSheet(
-                            title: Text("Options"),
-                            buttons: [
-                                .default(Text("Download")), // Replace with actual actions
-                                .cancel()
-                            ]
-                        )
-                    }
                 }
                 .padding(.top)
-                
+
                 Text(artifact.description)
                     .font(.subheadline)
-                    .padding(.vertical)
                     .lineLimit(nil)
-                
+
                 HStack(spacing: 10) {
                     likeDislikeButton(imageName: "hand.thumbsup", count: artifact.likes?.count) {
-                        viewModel.updateLike(for: artifact.id.uuidString, userID: "user123") // Convert UUID to String
+                        viewModel.updateLike(for: artifact.id.uuidString, userID: "user123")
                     }
 
                     likeDislikeButton(imageName: "hand.thumbsdown", count: artifact.dislikes?.count) {
-                        viewModel.updateDislike(for: artifact.id.uuidString, userID: "user124") // Update userID with actual value
+                        viewModel.updateDislike(for: artifact.id.uuidString, userID: "user124")
                     }
                     Spacer()
-                    // Watchlist button
                     Button(action: { isWatchlisted.toggle() }) {
                         HStack {
                             Image(systemName: isWatchlisted ? "eye.fill" : "eye")
@@ -72,23 +53,19 @@ struct ArtifactDetailView: View {
                     .foregroundColor(isWatchlisted ? Color.blue : Color.primary)
                 }
                 .padding(.vertical)
-                
+
                 HStack {
                     ratingStars(rating: viewModel.calculateStarRating(from: artifact.currentBid))
-
                     Spacer()
-                    Button("Bid") {
-                        // Implement Bid Action
-                    }
-                    .buttonStyle(PrimaryButtonStyle())
+                    Button("Bid") { /* Implement Bid Action */ }
+                        .buttonStyle(PrimaryButtonStyle())
                 }
-                .padding(.bottom)
             }
-            .padding(.horizontal)
+            .padding()
         }
         .navigationBarTitle(Text(artifact.title), displayMode: .inline)
     }
-    
+
     private func likeDislikeButton(imageName: String, count: Int?, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack {
@@ -99,7 +76,7 @@ struct ArtifactDetailView: View {
             }
         }
     }
-    
+
     private func ratingStars(rating: Double) -> some View {
         HStack {
             ForEach(0..<5, id: \.self) { index in
@@ -109,7 +86,35 @@ struct ArtifactDetailView: View {
         }
         .padding(.bottom)
     }
-
 }
 
 
+struct ArtifactDetailView_Previews: PreviewProvider {
+    static var previews: some View {
+        let viewModel = ArtifactsViewModel()
+        let imageURL = URL(string: "https://example.com/image.jpg")!
+        let videoURL = URL(string: "https://example.com/video.mp4")!
+        let artifact = ArtifactsData(
+            id: UUID(),
+            title: "Sample Artifact",
+            description: "This is a sample artifact",
+            startingPrice: 0.0,
+            currentBid: 100.0,
+            isSold: false,
+            likes: [],
+            dislikes: [],
+            currentBidder: "",
+            rating: 0.0,
+            isBidded: false,
+            bidEndDate: Date(),
+            imageURLs: [imageURL],
+            videoURL: [videoURL],
+            category: "Sample Category",
+            timestamp: Date() // Add the missing parameter
+        )
+        
+        return NavigationView {
+            ArtifactDetailView(viewModel: viewModel, artifact: artifact)
+        }
+    }
+}

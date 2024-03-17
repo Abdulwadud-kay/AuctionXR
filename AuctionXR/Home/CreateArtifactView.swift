@@ -201,12 +201,12 @@ struct CreateArtifactView: View {
         !title.isEmpty && !description.isEmpty && !startingPrice.isEmpty && selectedCategory != "Select Category" && acceptTerms && (!selectedImages.isEmpty || selectedVideoURL != nil)
     }
     private func saveDraft() {
-        uploadMedia(images: selectedImages, videos: selectedVideoURL != nil ? [selectedVideoURL!] : []) { imageURLs, videoURLs in
+        uploadMedia(images: selectedImages, videos: selectedVideoURL != nil ? [selectedVideoURL!] : []) { imageURLs, videoURL in
             let draftData: [String: Any] = [
                 "title": self.title,
                 "description": self.description,
                 "imageURLs": imageURLs,
-                "videoURLs": videoURLs,
+                "videoURL": videoURL,
                 "startingPrice": Double(self.startingPrice) ?? 0.0,
                 "bidEndDate": Timestamp(date: self.bidEndDate),
                 "category": self.selectedCategory,
@@ -237,12 +237,12 @@ struct CreateArtifactView: View {
             return
         }
         
-        uploadMedia(images: selectedImages, videos: selectedVideoURL != nil ? [selectedVideoURL!] : []) { imageURLs, videoURLs in
+        uploadMedia(images: selectedImages, videos: selectedVideoURL != nil ? [selectedVideoURL!] : []) { imageURLs, videoURL in
             let artifactData: [String: Any] = [
                 "title": self.title,
                 "description": self.description,
                 "imageURLs": imageURLs,
-                "videoURLs": videoURLs,
+                "videoURL": videoURL,
                 "startingPrice": Double(self.startingPrice) ?? 0.0,
                 "bidEndDate": Timestamp(date: self.bidEndDate),
                 "category": self.selectedCategory,
