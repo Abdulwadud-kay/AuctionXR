@@ -19,6 +19,7 @@ struct CreateArtifactView: View {
     @State private var isBlinking = false
     @State private var showImagePicker: Bool = false
     @Binding var isShowingCreateArtifactView: Bool
+    @State private var pickerPresented = false
     
     let userId: String // 2 years from now
     
@@ -96,18 +97,17 @@ struct CreateArtifactView: View {
                 
                 HStack(spacing: 30) { // Adjust spacing as needed
                     Button(action: {
-                        showImagePicker = true
-                    }) {
-                        VStack {
-                            Image(systemName: "camera.fill")
-                                .font(.title)
-                                .foregroundColor(.white)
-                            Text("Add Image")
-                                .foregroundColor(.white)
-                                .font(.caption)
+                        pickerPresented = true                    }) {
+                            VStack {
+                                Image(systemName: "camera.fill")
+                                    .font(.title)
+                                    .foregroundColor(.white)
+                                Text("Add Image")
+                                    .foregroundColor(.white)
+                                    .font(.caption)
+                            }
                         }
-                    }
-                    .disabled(selectedImages.count >= 4)
+                        .disabled(selectedImages.count >= 4)
                     
                     Button(action: {
                         showVideoPicker = true
@@ -187,8 +187,8 @@ struct CreateArtifactView: View {
                 .padding(.top, -10)
             }
             .background(LinearGradient(gradient: Gradient(colors: [gradientTop, gradientBottom]), startPoint: .top, endPoint: .bottom).edgesIgnoringSafeArea(.all))
-            .sheet(isPresented: $showImagePicker) {
-                MultiImagePicker(selectedImages: $selectedImages)
+            .sheet(isPresented: $pickerPresented) {
+                PHPickerViewControllerWrapper(selectedImages: $selectedImages, isPresented: $pickerPresented)
             }
             
             .sheet(isPresented: $showVideoPicker) {
@@ -316,7 +316,6 @@ struct CreateArtifactView: View {
             completion(imageURLs, videoURLs)
         }
     }
-    
 }
 
 struct CreateArtifactView_Previews: PreviewProvider {

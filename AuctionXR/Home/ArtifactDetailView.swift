@@ -9,7 +9,8 @@ struct ArtifactDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                MediaCarouselView(images: artifact.imageURLs, videos: artifact.videoURL)
+                MediaCarouselView(images: artifact.imageURLs, videos: artifact.videoURL, action: { _, _ in })
+
                     .frame(height: 300)
                     .cornerRadius(10)
                     .shadow(radius: 5)

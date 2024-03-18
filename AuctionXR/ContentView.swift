@@ -5,6 +5,7 @@
 import SwiftUI
 
 struct ContentView: View {
+    var viewModel = ArtifactsViewModel()
     @EnvironmentObject var userAuthManager: UserAuthenticationManager
 
     var body: some View {
@@ -15,6 +16,8 @@ struct ContentView: View {
             MainTabView()  // Replace with your actual MainTabView
         }
     }
+    
+    
 }
 
 
@@ -65,6 +68,7 @@ struct MainTabView: View {
         .onAppear {
             UITabBar.appearance().backgroundColor = UIColor(Color(hex:"f4e9dc"))
         }
+
     }
 }
 

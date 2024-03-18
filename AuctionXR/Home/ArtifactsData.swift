@@ -15,13 +15,13 @@ struct ArtifactsData: Identifiable, Codable {
     var rating: Double
     var isBidded: Bool
     var bidEndDate: Date
-    var imageURLs: [URL?]
-    var videoURL: [URL?]
+    var imageURLs: [URL]
+    var videoURL: [URL]
     var category: String
     var timestamp: Date?
    
 
-    init(id: UUID = UUID(), title: String, description: String, startingPrice: Double, currentBid: Double, isSold: Bool, likes: [String]? = nil, dislikes: [String]? = nil, currentBidder: String, rating: Double,isBidded: Bool, bidEndDate: Date, imageURLs: [URL?], videoURL: [URL?], category: String, timestamp: Date? = nil) {
+    init(id: UUID = UUID(), title: String, description: String, startingPrice: Double, currentBid: Double, isSold: Bool, likes: [String]? = nil, dislikes: [String]? = nil, currentBidder: String, rating: Double,isBidded: Bool, bidEndDate: Date, imageURLs: [URL], videoURL: [URL], category: String, timestamp: Date? = nil) {
         self.id = id
         self.title = title
         self.description = description

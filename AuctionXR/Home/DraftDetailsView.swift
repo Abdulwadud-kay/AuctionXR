@@ -1,46 +1,56 @@
+
+
+
 import SwiftUI
 
 struct DraftDetailsView: View {
     @ObservedObject var viewModel: ArtifactsViewModel
-    @State private var isEditing = false
-    @State private var editedTitle: String = ""
-    @State private var editedDescription: String = ""
-    @State private var editedStartingPrice: Double = 0.0
-    @State private var editedBidEndTime: Date = Date()
-    @State private var selectedCategory: String = ""
-    @State private var showDeleteConfirmation = false
-    @State private var showImagePicker = false
-    @State private var selectedImage: UIImage?
-    @State private var showVideoPicker = false
-    @State private var selectedVideoURL: URL?
-    @State private var editedImageURLs: [URL] = []
-    @State private var editedVideoURL: URL?
-    
-    
     var artifact: ArtifactsData
-
+    
+    @State private var editedTitle: String
+    @State private var editedDescription: String
+    @State private var editedStartingPrice: Double
+    @State private var editedBidEndTime: Date
+    @State private var selectedCategory: String
+    @State private var isEditing = false
+    @State private var showDeleteConfirmation = false
+    @State private var selectedImageIndex: Int?
+    @State private var showImagePicker = false
+    @State private var showVideoPicker = false
+    @State private var selectedImageURL: UIImage?
+    @State private var selectedVideoURL: URL?
+    
+    
+    
     init(viewModel: ArtifactsViewModel, artifact: ArtifactsData) {
-            self.viewModel = viewModel
-            self.artifact = artifact
-            self._editedTitle = State(initialValue: artifact.title)
-            self._editedDescription = State(initialValue: artifact.description)
-            self._editedStartingPrice = State(initialValue: artifact.startingPrice)
-            self._editedBidEndTime = State(initialValue: artifact.bidEndDate)
-            self._selectedCategory = State(initialValue: artifact.category)
-            self._editedImageURLs = State(initialValue: artifact.imageURLs.compactMap { $0 })
-            self._editedVideoURL = State(initialValue: artifact.videoURL)
-        }
-
+        self.viewModel = viewModel
+        self.artifact = artifact
+        
+        // Initialize state variables with original artifact details
+        self._editedTitle = State(initialValue: artifact.title)
+        self._editedDescription = State(initialValue: artifact.description)
+        self._editedStartingPrice = State(initialValue: artifact.startingPrice)
+        self._editedBidEndTime = State(initialValue: artifact.bidEndDate)
+        self._selectedCategory = State(initialValue: artifact.category)
+    }
+    
     var body: some View {
         ScrollView {
             VStack(alignment: .leading) {
-                MediaCarouselView(images: editedImageURLs, videos: [editedVideoURL].compactMap { $0 })
-                    .frame(height: 300)
-                    .cornerRadius(10)
-                    .shadow(radius: 5)
-                    .onTapGesture {
-                        isEditing ? showImagePicker.toggle() : ()
+                MediaCarouselView(images: artifact.imageURLs, videos: [artifact.videoURL.first].compactMap { $0 }) { index, isVideo in
+                    if isEditing {
+                        selectedImageIndex = index
+                        if isVideo {
+                            showVideoPicker.toggle()
+                        } else {
+                            showImagePicker.toggle()
+                        }
                     }
+                }
+
+                .frame(height: 300)
+                .cornerRadius(10)
+                .shadow(radius: 5)
                 
                 HStack {
                     TextField("Title", text: $editedTitle)
@@ -106,14 +116,24 @@ struct DraftDetailsView: View {
                 HStack {
                     ratingStars(rating: artifact.rating)
                     Spacer()
-                    Button(isEditing ? "Save" : "Edit") {
-                        isEditing.toggle()
+                    if isEditing {
+                        Button("Save") {
+                            updateArtifact()
+                            isEditing.toggle()
+                        }
+
+                        .buttonStyle(PrimaryButtonStyle())
+                        Button("Cancel") {
+                            resetEditedDetails()
+                            isEditing.toggle()
+                        }
+                        .buttonStyle(SecondaryButtonStyle())
+                    } else {
+                        Button("Edit") {
+                            isEditing.toggle()
+                        }
+                        .buttonStyle(PrimaryButtonStyle())
                     }
-                    .buttonStyle(PrimaryButtonStyle())
-                    Button("Post") {
-                        updateArtifact()
-                    }
-                    .buttonStyle(PrimaryButtonStyle())
                 }
                 .padding(.bottom)
             }
@@ -131,11 +151,14 @@ struct DraftDetailsView: View {
             )
         }
         .sheet(isPresented: $showImagePicker) {
-            ImagePicker(selectedImage: $selectedImage)
+            ImagePicker(selectedImage: self.$selectedImageURL, sourceType: .photoLibrary) { _ in }
         }
-        .sheet(isPresented: $showVideoPicker) {
-            VideoPicker(selectedVideoURL: $selectedVideoURL)
-        }
+
+
+                .sheet(isPresented: $showVideoPicker) {
+                    VideoPicker(selectedVideoURL: self.$selectedVideoURL)
+                }
+
     }
 
     private func ratingStars(rating: Double) -> some View {
@@ -154,18 +177,48 @@ struct DraftDetailsView: View {
     }
 
     private func updateArtifact() {
-        var updatedArtifact = artifact
-        updatedArtifact.title = editedTitle
-        updatedArtifact.description = editedDescription
-        updatedArtifact.startingPrice = editedStartingPrice
-        updatedArtifact.bidEndDate = editedBidEndTime
-        updatedArtifact.category = selectedCategory
-        updatedArtifact.imageURLs = editedImageURLs
-        updatedArtifact.videoURL = [editedVideoURL].compactMap { $0 }
+        let updatedArtifact = ArtifactsData(
+            id: artifact.id,
+            title: editedTitle,
+            description: editedDescription,
+            startingPrice: editedStartingPrice,
+            currentBid: artifact.currentBid,
+            isSold: artifact.isSold,
+            likes: artifact.likes,
+            dislikes: artifact.dislikes,
+            currentBidder: artifact.currentBidder,
+            rating: artifact.rating,
+            isBidded: artifact.isBidded,
+            bidEndDate: editedBidEndTime,
+            imageURLs: artifact.imageURLs,
+            videoURL: artifact.videoURL,
+            category: selectedCategory,
+            timestamp: artifact.timestamp
+        )
+        
+        viewModel.updateArtifact([updatedArtifact])
+    }
 
-        viewModel.updateArtifact(updatedArtifact)
+    private func resetEditedDetails() {
+        editedTitle = artifact.title
+        editedDescription = artifact.description
+        editedStartingPrice = artifact.startingPrice
+        editedBidEndTime = artifact.bidEndDate
+        selectedCategory = artifact.category
     }
 }
+struct SecondaryButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .padding(EdgeInsets(top: 10, leading: 20, bottom: 10, trailing: 20))
+            .foregroundColor(Color.white)
+            .background(Color.blue)
+            .cornerRadius(8)
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .animation(.easeInOut(duration: 0.1))
+    }
+}
+
 
 struct DraftDetailsView_Previews: PreviewProvider {
     static var previews: some View {
@@ -186,7 +239,7 @@ struct DraftDetailsView_Previews: PreviewProvider {
             isBidded: false,
             bidEndDate: Date(),
             imageURLs: [imageURL],
-            videoURL: videoURL,
+            videoURL: [videoURL],
             category: "Sample Category",
             timestamp: Date()
         )

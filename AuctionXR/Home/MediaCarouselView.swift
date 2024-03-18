@@ -55,8 +55,9 @@ struct VideoPlayerView: View {
 }
 
 struct MediaCarouselView: View {
-    let images: [URL]
-    let videos: [URL]
+    var images: [URL]
+    var videos: [URL?]
+    var action: (Int, Bool) -> Void
     @State private var currentIndex: Int = 0
 
     var body: some View {
@@ -71,10 +72,18 @@ struct MediaCarouselView: View {
                             .tag(index)
                     }
                     ForEach(0..<videos.count, id: \.self) { index in
-                        VideoPlayerView(videoName: videos[index].lastPathComponent)
-                            .frame(width: geometry.size.width)
-                            .tag(images.count + index)
+                        if let videoURL = videos[index] {
+                            let lastPathComponent = videoURL.lastPathComponent
+                            VideoPlayerView(videoName: lastPathComponent)
+                                .frame(width: geometry.size.width)
+                                .tag(images.count + index)
+                        }
+                    
+
                     }
+
+
+
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
             }

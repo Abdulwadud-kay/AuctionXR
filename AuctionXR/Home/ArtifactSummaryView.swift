@@ -25,7 +25,8 @@ struct ArtifactSummaryView: View {
             }) {
                 ZStack(alignment: .bottomTrailing) {
                     // Using AsyncImage to load an image from a URL
-                    if let url = artifact.imageURLs[currentImageIndex] {
+                    if let url = artifact.imageURLs[safe: currentImageIndex] {
+
                         AsyncImage(url: url) { image in
                             image.resizable()
                         } placeholder: {
@@ -53,20 +54,20 @@ struct ArtifactSummaryView: View {
                 .fontWeight(.bold)
                 .padding(.top, 2)
             
-            Text("Current Bid: $\(artifact.currentBid, specifier: "%.2f")")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-                .padding(.bottom, 2)
+//            Text("Current Bid: $\(artifact.currentBid, specifier: "%.2f")")
+//                .font(.subheadline)
+//                .foregroundColor(.secondary)
+//                .padding(.bottom, 2)
             
-            HStack {
-                ForEach(0..<Int(artifact.rating.rounded()), id: \.self) { _ in
-                    Image(systemName: "star.fill")
-                        .foregroundColor(.yellow)
-                }
-            }
-            .padding(.all, 10)
-            .cornerRadius(10)
-            .frame(width: UIScreen.main.bounds.width / 2 - 20)
+//            HStack {
+//                ForEach(0..<Int(artifact.rating.rounded()), id: \.self) { _ in
+//                    Image(systemName: "star.fill")
+//                        .foregroundColor(.yellow)
+//                }
+//            }
+//            .padding(.all, 10)
+//            .cornerRadius(10)
+//            .frame(width: UIScreen.main.bounds.width / 2 - 20)
         }
         .onReceive(timer) { _ in
             self.currentImageIndex = (self.currentImageIndex + 1) % (artifact.imageURLs.count > 0 ? artifact.imageURLs.count : 1)

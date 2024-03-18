@@ -95,7 +95,8 @@ struct HomeViewController: View {
                         .progressViewStyle(CircularProgressViewStyle(tint: headerColor))
                         .padding(.top, 20)
                 } else {
-                    ArtifactsListView(artifacts: artifactsViewModel.artifacts!)
+                    ArtifactsListView(viewModel: artifactsViewModel, artifacts: artifactsViewModel.artifacts!)
+
                         .padding(.top, 20) // Adjust spacing as needed
                         .background(Color.white) // Ensure consistent background color
                 }
