@@ -16,7 +16,6 @@
 		14DAC73A2B7E9AC30082E558 /* ArtifactsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14DAC7392B7E9AC30082E558 /* ArtifactsViewModel.swift */; };
 		14DAC73C2B7E9DFF0082E558 /* PrimaryButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14DAC73B2B7E9DFF0082E558 /* PrimaryButtonStyle.swift */; };
 		14E1329E2B8171D50006B15E /* CountdownTimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14E1329D2B8171D40006B15E /* CountdownTimerView.swift */; };
-		14E132A02B8176910006B15E /* ArtifactListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14E1329F2B8176910006B15E /* ArtifactListView.swift */; };
 		14E3F77A2B66C35100FCE5AF /* AuctionXRApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14E3F7792B66C35100FCE5AF /* AuctionXRApp.swift */; };
 		14E3F77C2B66C35200FCE5AF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14E3F77B2B66C35200FCE5AF /* ContentView.swift */; };
 		14E3F77E2B66C35600FCE5AF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 14E3F77D2B66C35600FCE5AF /* Assets.xcassets */; };
@@ -83,7 +82,6 @@
 		14DAC7392B7E9AC30082E558 /* ArtifactsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtifactsViewModel.swift; sourceTree = "<group>"; };
 		14DAC73B2B7E9DFF0082E558 /* PrimaryButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimaryButtonStyle.swift; sourceTree = "<group>"; };
 		14E1329D2B8171D40006B15E /* CountdownTimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountdownTimerView.swift; sourceTree = "<group>"; };
-		14E1329F2B8176910006B15E /* ArtifactListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArtifactListView.swift; sourceTree = "<group>"; };
 		14E3F7762B66C35100FCE5AF /* AuctionXR.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AuctionXR.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		14E3F7792B66C35100FCE5AF /* AuctionXRApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuctionXRApp.swift; sourceTree = "<group>"; };
 		14E3F77B2B66C35200FCE5AF /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -220,7 +218,6 @@
 				14DAC7392B7E9AC30082E558 /* ArtifactsViewModel.swift */,
 				14DAC73B2B7E9DFF0082E558 /* PrimaryButtonStyle.swift */,
 				14E1329D2B8171D40006B15E /* CountdownTimerView.swift */,
-				14E1329F2B8176910006B15E /* ArtifactListView.swift */,
 				141138702B8EADE7001E84C2 /* ArtifactDetailView.swift */,
 				143699762B93D21100222C00 /* ArtifactDraftView.swift */,
 				1466696D2B9903A2005ADF87 /* DraftDetailsView.swift */,
@@ -392,7 +389,6 @@
 				14E939642BA4BE47003F3542 /* BidView.swift in Sources */,
 				14DAC73A2B7E9AC30082E558 /* ArtifactsViewModel.swift in Sources */,
 				14E3F77C2B66C35200FCE5AF /* ContentView.swift in Sources */,
-				14E132A02B8176910006B15E /* ArtifactListView.swift in Sources */,
 				14E3F7B72B66C77B00FCE5AF /* PreviewView.swift in Sources */,
 				14E3F7BA2B66C7A600FCE5AF /* Extensions.swift in Sources */,
 				14E3F7922B66C4DF00FCE5AF /* CreateArtifactView.swift in Sources */,

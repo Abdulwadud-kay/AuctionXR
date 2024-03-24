@@ -90,8 +90,10 @@ struct RegisterViewController: View {
                     "email": email
                 ]) { error in
                     if let error = error {
+                        print("Error registering user:", error.localizedDescription) // Print error message to console
                         self.showError = true
                         self.errorMessage = error.localizedDescription
+
                     } else {
                         DispatchQueue.main.async {
                             

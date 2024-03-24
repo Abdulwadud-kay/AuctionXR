@@ -7,7 +7,7 @@ struct ArtifactsData: Identifiable, Codable {
     var title: String
     var description: String
     var startingPrice: Double
-    var currentBid: Double
+    var currentBid: Double?
     var isSold: Bool
     var likes: [String]?
     var dislikes: [String]?
@@ -16,12 +16,12 @@ struct ArtifactsData: Identifiable, Codable {
     var isBidded: Bool
     var bidEndDate: Date
     var imageURLs: [URL]
-    var videoURL: [URL]
+    var videoURL: [URL]?
     var category: String
     var timestamp: Date?
    
 
-    init(id: UUID = UUID(), title: String, description: String, startingPrice: Double, currentBid: Double, isSold: Bool, likes: [String]? = nil, dislikes: [String]? = nil, currentBidder: String, rating: Double,isBidded: Bool, bidEndDate: Date, imageURLs: [URL], videoURL: [URL], category: String, timestamp: Date? = nil) {
+    init(id: UUID, title: String, description: String, startingPrice: Double, currentBid: Double?, isSold: Bool, likes: [String]?, dislikes: [String]?, currentBidder: String, rating: Double, isBidded: Bool, bidEndDate: Date, imageURLs: [URL], videoURL: [URL], category: String, timestamp: Date?) {
         self.id = id
         self.title = title
         self.description = description

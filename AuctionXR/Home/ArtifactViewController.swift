@@ -34,38 +34,33 @@ struct ArtifactViewController: View {
                 .padding()
                 
                 // Scroll view to display artifacts based on selected tab
+                // Scroll view to display artifacts based on selected tab
                 ScrollView {
-                    VStack(alignment: .leading) {
-                        // Filter and display artifacts based on selected tab
-                        // Backend Developer: Fetch and filter artifact data from Firestore based on isBidded property
-                        if isLoading {
-                            ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: buttonColor))
-                                .padding()
-                        } else {
-                            ForEach(artifacts.filter { $0.isBidded == (selectedTab == .bidded) }, id: \.id) { artifact in
-                                if selectedTab == .bidded {
-                                    ArtifactSummaryView(viewModel: viewModel, artifact: artifact)
-                                        .padding()
-                                        .background(detailBoxColor)
-                                        .cornerRadius(10)
-                                } else {
-                                    ArtifactDraftView(viewModel: viewModel, artifact: artifact)
-                                        .padding()
-                                        .background(detailBoxColor)
-                                        .cornerRadius(10)
-                                }
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 20) {
+                        ForEach(artifacts.filter { $0.isBidded == (selectedTab == .bidded) }, id: \.id) { artifact in
+                            if selectedTab == .bidded {
+                                ArtifactSummaryView(viewModel: viewModel, artifact: artifact)
+                                    .padding()
+                                    .background(detailBoxColor)
+                                    .cornerRadius(10)
+                            } else {
+                                ArtifactDraftView(viewModel: viewModel, artifact: artifact)
+                                    .padding()
+                                    .background(detailBoxColor)
+                                    .cornerRadius(10)
                             }
                         }
                     }
+                    .padding()
                 }
                 .background(infoBoxColor)
+
             }
             .navigationBarTitle("My Artifacts", displayMode: .inline)
             .navigationBarItems(trailing: navigationBarTrailingItem)
             .sheet(isPresented: $isShowingCreateArtifactView) {
                 // Replace "currentUser" with the actual user ID from Firebase
-                CreateArtifactView(isShowingCreateArtifactView: $isShowingCreateArtifactView, userId: actualUserID)
+                CreateArtifactView(isShowingCreateArtifactView: $isShowingCreateArtifactView, artifactsViewModel: ArtifactsViewModel(), userId: actualUserID)
             }
             .onAppear(perform: loadArtifacts) // Load artifacts when view appears
         }

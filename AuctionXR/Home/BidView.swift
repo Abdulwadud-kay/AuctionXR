@@ -1,10 +1,14 @@
 import SwiftUI
+import FirebaseAuth
 
 struct BidView: View {
     @State private var bidAmount: Double = 0
     @State private var isShowingAlert = false
     @State private var showAlert = false
+    @ObservedObject var viewModel: ArtifactsViewModel
     var artifact: ArtifactsData // Assuming Artifact is your data model
+    var currentBidder: String
+    var artifactID: String
     
     var body: some View {
         VStack {
@@ -68,19 +72,20 @@ struct BidView: View {
                     Text("$\(String(format: "%.2f", artifact.startingPrice))")
                         .foregroundColor(.black)
                         .padding(.bottom, 5) // Add bottom padding
-                    Text("$\(String(format: "%.2f", artifact.currentBid))")
-                        .foregroundColor(.black)
-                        .padding(.bottom, 5) // Add bottom padding
+//                    Text("$\(String(format: "%.2f", artifact.currentBid))")
+//                        .foregroundColor(.black)
+//                        .padding(.bottom, 5) // Add bottom padding
                 }
             }
             .padding(.horizontal, 20) // Add horizontal padding
             
-            Stepper("Bid Amount: $\(String(format: "%.2f", bidAmount))", value: $bidAmount, in: artifact.currentBid...100000)
-                .padding(.vertical, 10)
-            
+//            Stepper("Bid Amount: $\(String(format: "%.2f", bidAmount))", value: $bidAmount, in: artifact.currentBid...100000)
+//                .padding(.vertical, 10)
+//            
             Button(action: {
                 // Place bid logic here
                 showAlert = true
+                viewModel.updateFirebaseDatabaseWithBid(artifactID: artifactID, bidAmount: bidAmount, bidderUsername: currentBidder)
             }) {
                 Text("Bid")
                     .foregroundColor(Color(hex: "dbb88e")) // Set the color to dbb88e
@@ -112,18 +117,25 @@ struct BidView: View {
 
 struct BidView_Previews: PreviewProvider {
     static var previews: some View {
-        BidView(artifact: ArtifactsData(id: UUID(),
-                                        title: "Test Artifact",
-                                        description: "Description",
-                                        startingPrice: 100,
-                                        currentBid: 150,
-                                        isSold: false,
-                                        currentBidder: "Current Bidder",
-                                        rating: 0.0,
-                                        isBidded: false,
-                                        bidEndDate: Date(),
-                                        imageURLs: [],
-                                        videoURL: [],
-                                        category: "Category"))
+        let viewModel = ArtifactsViewModel() // Initialize your view model here
+        BidView(viewModel: viewModel, artifact: ArtifactsData(
+            id: UUID(),
+            title: "Test Artifact",
+            description: "Description",
+            startingPrice: 100,
+            currentBid: 150,
+            isSold: false,
+            likes: [], // Provide empty arrays for likes and dislikes
+            dislikes: [],
+            currentBidder: "Current Bidder",
+            rating: 0.0,
+            isBidded: false,
+            bidEndDate: Date(),
+            imageURLs: [],
+            videoURL: [],
+            category: "Category",
+            timestamp: Date() // Provide a timestamp or mark it as optional
+        ), currentBidder: "YourUsername", artifactID: "YourArtifactID")
     }
 }
+

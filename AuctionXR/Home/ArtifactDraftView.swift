@@ -1,5 +1,21 @@
 import SwiftUI
 
+struct RatingStarsView: View {
+    var rating: Double
+
+    var body: some View {
+        HStack {
+            ForEach(0..<5, id: \.self) { index in
+                Image(systemName: index < Int(rating.rounded()) ? "star.fill" : "star")
+                    .foregroundColor(.yellow)
+            }
+        }
+        .padding(.all, 10)
+        .cornerRadius(10)
+        .frame(width: UIScreen.main.bounds.width / 2 - 20)
+    }
+}
+
 struct ArtifactDraftView: View {
     @ObservedObject var viewModel: ArtifactsViewModel
     var artifact: ArtifactsData
@@ -16,25 +32,19 @@ struct ArtifactDraftView: View {
             
             Button(action: {
                 self.currentImageIndex = (self.currentImageIndex + 1) % artifact.imageURLs.count
-                self.loadImage(from: artifact.imageURLs[currentImageIndex])
             }) {
-                if let image = image {
-                    ZStack(alignment: .bottomTrailing) {
-                        image
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: UIScreen.main.bounds.width / 2 - 30, height: 200)
-                            .cornerRadius(10)
-                            .shadow(color: .gray, radius: 4, x: 0, y: 2)
-                        
-                        CountdownTimerView(endTime: artifact.bidEndDate)
-                            .padding([.bottom, .trailing], 10)
-                    }
-                } else {
-                    ProgressView()
+                // Display artifact image with AsyncImage
+                AsyncImage(url: artifact.imageURLs[currentImageIndex]) { image in
+                    image
+                        .resizable()
+                        .scaledToFit()
                         .frame(width: UIScreen.main.bounds.width / 2 - 30, height: 200)
-                        .padding()
+                        .cornerRadius(10)
+                        .shadow(color: .gray, radius: 4, x: 0, y: 2)
+                } placeholder: {
+                    ProgressView()
                 }
+
             }
             
             Text(artifact.title)
@@ -42,41 +52,19 @@ struct ArtifactDraftView: View {
                 .fontWeight(.bold)
                 .padding(.top, 2)
             
-            Text("Current Bid: $\(artifact.currentBid, specifier: "%.2f")")
+            Text("Starting Price: $\(artifact.startingPrice, specifier: "%.2f")")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .padding(.bottom, 2)
             
-            HStack {
-                ForEach(0..<Int(artifact.rating.rounded()), id: \.self) { _ in
-                    Image(systemName: "star.fill")
-                        .foregroundColor(.yellow)
-                }
-            }
-            .padding(.all, 10)
-            .cornerRadius(10)
-            .frame(width: UIScreen.main.bounds.width / 2 - 20)
+            // Display rating stars
+            RatingStarsView(rating: artifact.rating)
         }
+        // Handle timer for image rotation
         .onReceive(timer) { _ in
-            self.currentImageIndex = (self.currentImageIndex + 1) % artifact.imageURLs.count
-            self.loadImage(from: artifact.imageURLs[currentImageIndex])
+            self.currentImageIndex = (self.currentImageIndex + 1) % (artifact.imageURLs.count > 0 ? artifact.imageURLs.count : 1)
         }
-        .onAppear {
-            self.loadImage(from: artifact.imageURLs[currentImageIndex])
-        }
-    }
 
-    private func loadImage(from url: URL) {
-        URLSession.shared.dataTask(with: url) { data, _, error in
-            if let data = data, let uiImage = UIImage(data: data) {
-                DispatchQueue.main.async {
-                    self.image = Image(uiImage: uiImage)
-                }
-            } else {
-                // Handle error or use a default image
-                print("Error loading image:", error ?? "Unknown error")
-            }
-        }.resume()
     }
 }
 

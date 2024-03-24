@@ -1,4 +1,5 @@
 import SwiftUI
+import FirebaseAuth
 
 struct ArtifactDetailView: View {
     @ObservedObject var viewModel: ArtifactsViewModel
@@ -9,7 +10,8 @@ struct ArtifactDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                MediaCarouselView(images: artifact.imageURLs, videos: artifact.videoURL, action: { _, _ in })
+                MediaCarouselView(images: artifact.imageURLs, videos: artifact.videoURL ?? [], action: { _, _ in })
+
 
                     .frame(height: 300)
                     .cornerRadius(10)
@@ -56,9 +58,20 @@ struct ArtifactDetailView: View {
                 .padding(.vertical)
 
                 HStack {
-                    ratingStars(rating: viewModel.calculateStarRating(from: artifact.currentBid))
+                    ratingStars(rating: artifact.rating)
                     Spacer()
-                    Button("Bid") { /* Implement Bid Action */ }
+                    Button(action: {
+                        // Fetch the currently authenticated user's username
+                        guard let bidderUsername = Auth.auth().currentUser?.displayName else {
+                            // Handle case when user is not authenticated or username is not available
+                            return
+                        }
+                        
+                        // Pass the artifactID and bidderUsername to the BidView
+                        let bidView = BidView(viewModel: viewModel, artifact: artifact, currentBidder: bidderUsername, artifactID: artifact.id.uuidString)
+                        // Present or navigate to the bidView
+                    }) {
+                    }
                         .buttonStyle(PrimaryButtonStyle())
                 }
             }
@@ -115,7 +128,8 @@ struct ArtifactDetailView_Previews: PreviewProvider {
         )
         
         return NavigationView {
-            ArtifactDetailView(viewModel: viewModel, artifact: artifact)
-        }
+                    ArtifactDetailView(viewModel: viewModel, artifact: artifact)
+                        .environmentObject(viewModel) // Pass the viewModel using environmentObject
+                }
     }
 }

@@ -81,10 +81,12 @@ struct HomeViewController: View {
                             .padding(.trailing, 10)
                             .padding(.top, 6)
                             .padding(.vertical, 6)
+                            
                         }
                         .padding(.horizontal) // Add horizontal padding for the whole HStack
                         .cornerRadius(15) // Optional: Add corner radius if needed
                         .background(Color(headerColor))
+                        
                     }
                 }
                 
@@ -93,12 +95,20 @@ struct HomeViewController: View {
                     // Show loading indicator
                     ProgressView()
                         .progressViewStyle(CircularProgressViewStyle(tint: headerColor))
-                        .padding(.top, 20)
+                        .padding(.top, 300)
+                        .padding(.bottom, 400)
                 } else {
-                    ArtifactsListView(viewModel: artifactsViewModel, artifacts: artifactsViewModel.artifacts!)
-
-                        .padding(.top, 20) // Adjust spacing as needed
-                        .background(Color.white) // Ensure consistent background color
+                    // Display artifacts in two columns
+                    ScrollView {
+                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 20) {
+                            ForEach(artifactsViewModel.artifacts ?? [], id: \.id) { artifact in
+                                ArtifactSummaryView(viewModel: artifactsViewModel, artifact: artifact)
+                            }
+                        }
+                        .padding()
+                    }
+                    .background(Color.white) // Ensure consistent background color
+                     // Adjust spacing as needed
                 }
             }
             .edgesIgnoringSafeArea(.all)

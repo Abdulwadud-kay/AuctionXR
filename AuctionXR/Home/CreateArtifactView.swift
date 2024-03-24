@@ -20,8 +20,19 @@ struct CreateArtifactView: View {
     @State private var showImagePicker: Bool = false
     @Binding var isShowingCreateArtifactView: Bool
     @State private var pickerPresented = false
+    @StateObject var artifactsViewModel: ArtifactsViewModel
     
     let userId: String // 2 years from now
+    
+    
+    let defaultCurrentBid: Double? = nil
+    let defaultIsSold: Bool = false
+    let defaultLikes: [String]? = nil
+    let defaultDislikes: [String]? = nil
+    let defaultCurrentBidder: String = ""
+    let defaultRating: Double = 0.0
+    let defaultIsBidded: Bool = false
+    let defaultTimestamp: Date? = nil
     
     let minBidDuration: TimeInterval = 30 * 60 // 30 minutes in seconds
     let maxBidDuration: TimeInterval = 2 * 365 * 24 * 60 * 60 // 2 years in seconds
@@ -130,6 +141,8 @@ struct CreateArtifactView: View {
                         ForEach(selectedImages.indices, id: \.self) { index in
                             ZStack(alignment: .topTrailing) {
                                 Image(uiImage: selectedImages[index])
+
+
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 100, height: 100)
@@ -196,66 +209,40 @@ struct CreateArtifactView: View {
             }
         }
     }
-    
+
     private var isFormComplete: Bool {
         !title.isEmpty && !description.isEmpty && !startingPrice.isEmpty && selectedCategory != "Select Category" && acceptTerms && (!selectedImages.isEmpty || selectedVideoURL != nil)
     }
     private func saveDraft() {
         uploadMedia(images: selectedImages, videos: selectedVideoURL != nil ? [selectedVideoURL!] : []) { imageURLs, videoURL in
-            let draftData: [String: Any] = [
-                "title": self.title,
-                "description": self.description,
-                "imageURLs": imageURLs,
-                "videoURL": videoURL,
-                "startingPrice": Double(self.startingPrice) ?? 0.0,
-                "bidEndDate": Timestamp(date: self.bidEndDate),
-                "category": self.selectedCategory,
-                "userID": self.userId,
-                "timestamp": FieldValue.serverTimestamp()            ]
+
             
-            let db = Firestore.firestore()
-            db.collection("users").document(self.userId).collection("drafts").addDocument(data: draftData) { error in
-                if let error = error {
-                    print("Error saving draft: \(error.localizedDescription)")
-                } else {
-                    print("Draft saved successfully")
-                    withAnimation(.easeInOut(duration: 0.5).repeatCount(3, autoreverses: true)) {
-                        isBlinking = true
-                    }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                        isBlinking = false
-                        isShowingCreateArtifactView = false // Dismiss the view here
-                    }
-                }
-            }
-        }
-    }
-    
-    private func submitArtifact() {
-        guard isFormComplete else {
-            print("Form is incomplete")
-            return
-        }
-        
-        uploadMedia(images: selectedImages, videos: selectedVideoURL != nil ? [selectedVideoURL!] : []) { imageURLs, videoURL in
-            let artifactData: [String: Any] = [
+            // Create the ArtifactsData instance here
+            let draftData: [String: Any] = [
+                "id": UUID().uuidString,
                 "title": self.title,
                 "description": self.description,
+                "startingPrice": self.startingPrice,
+                "rating": defaultRating,
+                "bidEndDate": Timestamp(date: self.bidEndDate),
                 "imageURLs": imageURLs,
                 "videoURL": videoURL,
-                "startingPrice": Double(self.startingPrice) ?? 0.0,
-                "bidEndDate": Timestamp(date: self.bidEndDate),
+
                 "category": self.selectedCategory,
                 "userID": self.userId,
                 "timestamp": FieldValue.serverTimestamp()
             ]
-            
+
+
             let db = Firestore.firestore()
-            db.collection("users").document(self.userId).collection("posts").addDocument(data: artifactData) { error in
+            db.collection("users").document(self.userId).collection("drafts").addDocument(data: draftData) { error in
                 if let error = error {
-                    print("Error submitting artifact: \(error.localizedDescription)")
+                    print("Error saving draft: \(error.localizedDescription)")
+                    // Inform the user about the error, e.g., show an alert
                 } else {
-                    print("Artifact submitted successfully")
+                    print("Draft saved successfully")
+                    // Provide feedback to the user, e.g., display a success message
+                    
                     withAnimation(.easeInOut(duration: 0.5).repeatCount(3, autoreverses: true)) {
                         isBlinking = true
                     }
@@ -267,6 +254,65 @@ struct CreateArtifactView: View {
             }
         }
     }
+
+    private func submitArtifact() {
+        guard isFormComplete else {
+            print("Form is incomplete")
+            // Inform the user that the form is incomplete
+            return
+        }
+        
+        uploadMedia(images: selectedImages, videos: selectedVideoURL != nil ? [selectedVideoURL!] : []) { imageURLs, videoURL in
+
+            
+            // Create the ArtifactsData instance here
+            let artifactData: [String: Any] = [
+                "id": UUID().uuidString,
+                "title": self.title,
+                "description": self.description,
+                "startingPrice": self.startingPrice,
+                "currentBid": defaultCurrentBid as Any,
+                "isSold": defaultIsSold,
+                "likes": defaultLikes as Any,
+                "dislikes": defaultDislikes as Any,
+                "currentBidder": defaultCurrentBidder,
+                "rating": defaultRating,
+                "isBidded": defaultIsBidded,
+                "bidEndDate": Timestamp(date: self.bidEndDate),
+                "imageURLs": imageURLs,
+                "videoURL": videoURL,
+
+
+                "category": self.selectedCategory,
+                "userID": self.userId,
+                "timestamp": FieldValue.serverTimestamp()
+            ]
+
+
+            let db = Firestore.firestore()
+            let artifactRef = db.collection("users").document(self.userId).collection("posts").document() // Generate a new document ID
+            
+            artifactRef.setData(artifactData) { error in
+                if let error = error {
+                    print("Error submitting artifact: \(error.localizedDescription)")
+                    // Inform the user about the error, e.g., show an alert
+                } else {
+                    print("Artifact submitted successfully")
+                    // Provide feedback to the user, e.g., display a success message
+
+                    withAnimation(.easeInOut(duration: 0.5).repeatCount(3, autoreverses: true)) {
+                        isBlinking = true
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                        isBlinking = false
+                        isShowingCreateArtifactView = false // Dismiss the view here
+                    }
+                }
+            }
+        }
+    }
+
+
     
     func uploadMedia(images: [UIImage], videos: [URL], completion: @escaping ([String], [String]) -> Void) {
         let storage = Storage.storage()
@@ -281,13 +327,20 @@ struct CreateArtifactView: View {
             let imageRef = storage.reference().child("images/\(UUID().uuidString).jpg")
             
             imageRef.putData(imageData, metadata: nil) { (metadata, error) in
-                guard error == nil else {
+                if let error = error {
+                    print("Error uploading image: \(error.localizedDescription)")
                     dispatchGroup.leave()
                     return
                 }
                 imageRef.downloadURL { (url, error) in
+                    if let error = error {
+                        print("Error fetching image download URL: \(error.localizedDescription)")
+                        dispatchGroup.leave()
+                        return
+                    }
                     if let downloadURL = url?.absoluteString {
                         imageURLs.append(downloadURL)
+                        print("Image uploaded successfully. Download URL: \(downloadURL)")
                     }
                     dispatchGroup.leave()
                 }
@@ -299,13 +352,20 @@ struct CreateArtifactView: View {
             let videoRef = storage.reference().child("videos/\(UUID().uuidString).mp4")
             
             videoRef.putFile(from: video, metadata: nil) { (metadata, error) in
-                guard error == nil else {
+                if let error = error {
+                    print("Error uploading video: \(error.localizedDescription)")
                     dispatchGroup.leave()
                     return
                 }
                 videoRef.downloadURL { (url, error) in
+                    if let error = error {
+                        print("Error fetching video download URL: \(error.localizedDescription)")
+                        dispatchGroup.leave()
+                        return
+                    }
                     if let downloadURL = url?.absoluteString {
                         videoURLs.append(downloadURL)
+                        print("Video uploaded successfully. Download URL: \(downloadURL)")
                     }
                     dispatchGroup.leave()
                 }
@@ -317,12 +377,11 @@ struct CreateArtifactView: View {
         }
     }
 }
-
 struct CreateArtifactView_Previews: PreviewProvider {
     static var previews: some View {
         let userAuthManager = UserAuthenticationManager()
         // Assuming that isShowingCreateArtifactView is a Binding<Bool> and it should be the first argument
-        CreateArtifactView(isShowingCreateArtifactView: .constant(true), userId: userAuthManager.userData.userId)
+        CreateArtifactView(isShowingCreateArtifactView: .constant(true), artifactsViewModel: ArtifactsViewModel(), userId: userAuthManager.userData.userId)
     }
 }
 

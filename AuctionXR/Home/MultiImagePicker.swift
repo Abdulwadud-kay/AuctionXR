@@ -34,8 +34,14 @@ struct PHPickerViewControllerWrapper: UIViewControllerRepresentable {
                     result.itemProvider.loadObject(ofClass: UIImage.self) { (image, error) in
                         if let image = image as? UIImage {
                             DispatchQueue.main.async {
+                                // Print the selected image for debugging
+                                print("Selected Image: \(image)")
+                                // Check if the image is already in selectedImages array
                                 if !self.parent.selectedImages.contains(image) {
+                                    // If not, append the image to selectedImages
                                     self.parent.selectedImages.append(image)
+                                    // Print the updated selectedImages array for debugging
+                                    print("Selected Images: \(self.parent.selectedImages)")
                                 }
                             }
                         }

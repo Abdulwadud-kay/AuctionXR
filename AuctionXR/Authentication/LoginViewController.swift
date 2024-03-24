@@ -18,24 +18,24 @@ struct LoginViewController: View {
         NavigationStack {
             VStack(spacing: 15) {
                 HStack {
-                Image(systemName: "envelope")
-                    .foregroundColor(Color(buttonColor))
-                    .padding(.leading, 3)
-                TextField("Email", text: $email)
-                    .autocapitalization(.none)
-                    .keyboardType(.emailAddress)
-            }
+                    Image(systemName: "envelope")
+                        .foregroundColor(Color(buttonColor))
+                        .padding(.leading, 3)
+                    TextField("Email", text: $email)
+                        .autocapitalization(.none)
+                        .keyboardType(.emailAddress)
+                }
                 .padding(.horizontal)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 
                 HStack {
-                Image(systemName: "lock")
-                .foregroundColor(Color(buttonColor))
-                .padding(.leading, 8)
-                SecureField("Password", text: $password)
-            }
-            .padding(.horizontal)
-            .textFieldStyle(RoundedBorderTextFieldStyle())
+                    Image(systemName: "lock")
+                        .foregroundColor(Color(buttonColor))
+                        .padding(.leading, 8)
+                    SecureField("Password", text: $password)
+                }
+                .padding(.horizontal)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
                 
                 if showError {
                     Text(errorMessage)
@@ -78,7 +78,6 @@ struct LoginViewController: View {
         }
     }
 }
-
 struct LoginViewController_Previews: PreviewProvider {
     static var previews: some View {
         LoginViewController(showRegister: {})

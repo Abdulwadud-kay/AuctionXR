@@ -37,7 +37,7 @@ struct DraftDetailsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading) {
-                MediaCarouselView(images: artifact.imageURLs, videos: [artifact.videoURL.first].compactMap { $0 }) { index, isVideo in
+                MediaCarouselView(images: artifact.imageURLs, videos: artifact.videoURL ?? []) { index, isVideo in
                     if isEditing {
                         selectedImageIndex = index
                         if isVideo {
@@ -177,6 +177,11 @@ struct DraftDetailsView: View {
     }
 
     private func updateArtifact() {
+        guard let videoURL = artifact.videoURL else {
+                // Handle the case where videoURL is nil, if needed
+                return
+            }
+        
         let updatedArtifact = ArtifactsData(
             id: artifact.id,
             title: editedTitle,
@@ -191,7 +196,7 @@ struct DraftDetailsView: View {
             isBidded: artifact.isBidded,
             bidEndDate: editedBidEndTime,
             imageURLs: artifact.imageURLs,
-            videoURL: artifact.videoURL,
+            videoURL: videoURL,
             category: selectedCategory,
             timestamp: artifact.timestamp
         )
