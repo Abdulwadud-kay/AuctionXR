@@ -9,10 +9,10 @@ struct LoginViewController: View {
     @State private var password: String = ""
     @State private var showError = false
     @State private var errorMessage = ""
-    @EnvironmentObject var userAuthManager: UserAuthenticationManager
+    @EnvironmentObject var userAuthManager: UserManager
     
-    let backgroundColor = Color(hex: "f4e9dc")
-    let buttonColor = Color(hex: "dbb88e")
+    let backgroundColor = Color(.white)
+    let buttonColor = Color(hex: "#5729CE")
     
     var body: some View {
         NavigationStack {
@@ -36,6 +36,7 @@ struct LoginViewController: View {
                 }
                 .padding(.horizontal)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding(.bottom, 8)
                 
                 if showError {
                     Text(errorMessage)
@@ -51,7 +52,9 @@ struct LoginViewController: View {
                 .foregroundColor(.white)
                 .cornerRadius(8)
                 .padding(.horizontal)
-                
+                .padding(.bottom,100)
+                Spacer()
+                    .frame(height: 10)
                 Button("Don't have an account? Register here") {
                     showRegister()
                 }
@@ -81,7 +84,7 @@ struct LoginViewController: View {
 struct LoginViewController_Previews: PreviewProvider {
     static var previews: some View {
         LoginViewController(showRegister: {})
-            .environmentObject(UserAuthenticationManager())
-            .environmentObject(UserData())
+            .environmentObject(UserManager())
+//            .environmentObject(UserData())
     }
 }

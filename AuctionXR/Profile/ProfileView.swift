@@ -1,17 +1,14 @@
 import SwiftUI
 import FirebaseAuth
-import FirebaseFirestore
-import FirebaseStorage
 
 struct ProfileView: View {
-    @State private var isImagePickerPresented = false
-    @EnvironmentObject var userAuthManager: UserAuthenticationManager
+    @EnvironmentObject var userManager: UserManager
     @State private var isEditingProfile = false
     @State private var isLoggingOut = false
     @State private var newUsername: String = ""
     @Environment(\.presentationMode) var presentationMode
 
-var body: some View {
+    var body: some View {
         NavigationView {
             List {
                 VStack {
@@ -20,34 +17,29 @@ var body: some View {
                         usernameField
                         Spacer()
                     }.padding()
-                }.listRowBackground(Color(hex:"f4e9dc"))
+                }.listRowBackground(Color(.white))
                 generalSection
                 informationSection
             }
             .listStyle(InsetGroupedListStyle())
             .navigationBarTitle("Profile", displayMode: .inline)
             .navigationBarItems(trailing: editButton)
-            .alert(isPresented: $isLoggingOut, content: logoutAlert)
-            .sheet(isPresented: $isImagePickerPresented) {
-                ImagePicker(selectedImage: $userAuthManager.userData.userImage, sourceType: .photoLibrary) { image in
-                    if let image = image {
-                        userAuthManager.userData.userImage = image
-                        saveProfileChanges()
-                    }
-                }
-            }
-            .onChange(of: userAuthManager.appState) { appState in
-                if appState == .loggedOut {
-                    // User is logged out, handle accordingly (e.g., show login screen)
-                    // For now, we'll just dismiss the profile view
-                    presentationMode.wrappedValue.dismiss()
-                }
+            .alert(isPresented: $isLoggingOut) {
+                Alert(
+                    title: Text("Confirm Logout"),
+                    message: Text("Are you sure you want to log out?"),
+                    primaryButton: .destructive(Text("Logout")) {
+                        logoutUser()
+                    },
+                    secondaryButton: .cancel()
+                )
             }
         }
     }
+    
     private var profileImage: some View {
         ZStack {
-            if let image = userAuthManager.userData.userImage {
+            if let image = userManager.userImage {
                 Image(uiImage: image)
                     .resizable()
                     .scaledToFill()
@@ -60,15 +52,16 @@ var body: some View {
                     .overlay(
                         Group {
                             if !isEditingProfile {
-                                Text(userAuthManager.userData.userInitial)
+                                Text(String(userManager.userInitial))
                                     .foregroundColor(.white)
                                     .font(.title)
+                                
                             }
                         }
                     )
             }
             if isEditingProfile {
-                Button(action: selectImage) {
+                Button(action: userManager.selectImage) {
                     Text("Edit Image")
                         .foregroundColor(.white)
                         .font(.system(size: 10))
@@ -79,24 +72,21 @@ var body: some View {
             }
         }
     }
-
+    
     private var usernameField: some View {
         Group {
             if isEditingProfile {
                 TextField("Enter new username", text: $newUsername)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
             } else {
-                Text(userAuthManager.userData.username)
+                Text(userManager.username)
                     .font(.title3)
             }
         }
     }
-
+    
     private var generalSection: some View {
         Section(header: Text("General")) {
-            NavigationLink(destination: HistoryView()) {
-                Label("History", systemImage: "clock")
-            }
             NavigationLink(destination: HelpView()) {
                 Label("Help", systemImage: "questionmark.circle")
             }
@@ -109,7 +99,7 @@ var body: some View {
             .foregroundColor(.red)
         }
     }
-
+    
     private var informationSection: some View {
         Section(header: Text("Information")) {
             NavigationLink(destination: FAQsView()) {
@@ -120,80 +110,23 @@ var body: some View {
             }
         }
     }
-
+    
     private var editButton: some View {
         Button(isEditingProfile ? "Save" : "Edit") {
             if isEditingProfile {
-                saveProfileChanges()
+                userManager.updateUsername(newUsername)
+                userManager.saveProfileChanges()
             }
             isEditingProfile.toggle()
         }
     }
-
-    private func selectImage() {
-        isImagePickerPresented = true
-    }
-
-    private func saveProfileChanges() {
-            // Save the new username
-            if !newUsername.isEmpty {
-                updateUsernameInFirestore(newUsername)
-            }
-
-            // Save the new image
-            if let newImage = userAuthManager.userData.userImage {
-                userAuthManager.userData.uploadProfileImage(newImage) { result in
-                    switch result {
-                    case .success(let imageUrl):
-                        self.updateImageUrlInFirestore(imageUrl)
-                    case .failure(let error):
-                        print("Error uploading image: \(error.localizedDescription)")
-                    }
-                }
-            }
-        }
-    private func updateUsernameInFirestore(_ newUsername: String) {
-        let db = Firestore.firestore()
-        if let userId = Auth.auth().currentUser?.uid {
-            db.collection("users").document(userId).updateData(["username": newUsername]) { error in
-                if let error = error {
-                    print("Error updating username: \(error.localizedDescription)")
-                } else {
-                    // Update the username in UserData immediately after Firestore update
-                    DispatchQueue.main.async {
-                        self.userAuthManager.userData.username = newUsername
-                    }
-                }
-            }
-        }
-    }
-    private func updateImageUrlInFirestore(_ imageUrl: String) {
-        let db = Firestore.firestore()
-        if let userId = Auth.auth().currentUser?.uid {
-            db.collection("users").document(userId).updateData(["imageUrl": imageUrl]) { error in
-                if let error = error {
-                    print("Error updating image URL: \(error.localizedDescription)")
-                }
-            }
-        }
-    }
-
-    private func logoutAlert() -> Alert {
-        Alert(
-            title: Text("Logout"),
-            message: Text("Are you sure you want to logout?"),
-            primaryButton: .destructive(Text("Logout")) {
-                logoutUser()
-            },
-            secondaryButton: .cancel()
-        )
-    }
-
+    
     private func logoutUser() {
         do {
             try Auth.auth().signOut()
-            userAuthManager.userData.updateLoginState(isLoggedIn: false)
-            userAuthManager.appState = .loggedOut
+            userManager.isLoggedIn = false
+            userManager.appState = .loggedOut
+            print("User logged out")
         } catch {
             print("Error logging out: \(error.localizedDescription)")
         }
@@ -202,8 +135,8 @@ var body: some View {
 
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
-        let userAuthManager = UserAuthenticationManager()
+        let userManager = UserManager()
         return ProfileView()
-            .environmentObject(userAuthManager)
+            .environmentObject(userManager)
     }
 }

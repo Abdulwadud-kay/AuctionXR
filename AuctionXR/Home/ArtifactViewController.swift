@@ -5,16 +5,16 @@ struct ArtifactViewController: View {
     @State private var isShowingCreateArtifactView = false
     @State private var artifacts: [ArtifactsData] = [] // Array to store real artifacts
     @State private var selectedTab: ArtifactTab = .notBidded
-    @EnvironmentObject var userAuthManager: UserAuthenticationManager
+    @EnvironmentObject var userAuthManager: UserManager
     @State private var isLoading = false // Add loading state
     
     // Custom colors for UI elements
     let infoBoxColor = Color.gray.opacity(0.2)
-    let buttonColor = Color(hex: "dbb88e")
+    let buttonColor = Color(hex: "#5729CE")
     let detailBoxColor = Color(hex: "f4e9dc")
     
     var actualUserID: String {
-        userAuthManager.userData.userId
+        userAuthManager.userId
     }
     
     // Enum to manage the tabs for artifact categories

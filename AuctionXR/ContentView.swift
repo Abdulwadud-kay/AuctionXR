@@ -6,7 +6,7 @@ import SwiftUI
 
 struct ContentView: View {
     var viewModel = ArtifactsViewModel()
-    @EnvironmentObject var userAuthManager: UserAuthenticationManager
+    @EnvironmentObject var userAuthManager: UserManager
 
     var body: some View {
         switch userAuthManager.appState {
@@ -23,15 +23,26 @@ struct ContentView: View {
 
 
 struct AuthenticationView: View {
-    @State private var showingLogin = true
-    @EnvironmentObject var userAuthManager: UserAuthenticationManager
+    @State private var showingRegister = false // Use this state to track whether to show the registration view
+    @EnvironmentObject var userAuthManager: UserManager
 
     var body: some View {
-        if showingLogin {
-            LoginViewController(showRegister: { showingLogin = false })
-                .environmentObject(userAuthManager)
+        if showingRegister {
+            RegisterViewController(showLogin: { showingRegister = false }) {
+                // Handle successful registration
+                self.userAuthManager.verifyAccountSetup() // Verify account setup after successful registration
+                self.showingRegister = false // Dismiss the registration view
+            }
+            .environmentObject(userAuthManager)
+        } else if userAuthManager.isLoggedIn {
+            if userAuthManager.isAccountSetup {
+                MainTabView()
+            } else {
+                AccountDetailsView()
+                    .environmentObject(userAuthManager)
+            }
         } else {
-            RegisterViewController(showLogin: { showingLogin = true })
+            LoginViewController(showRegister: { showingRegister = true })
                 .environmentObject(userAuthManager)
         }
     }
@@ -45,7 +56,7 @@ struct AuthenticationView: View {
 
 struct MainTabView: View {
     @State private var selection = 0
-    @EnvironmentObject var userAuthManager: UserAuthenticationManager
+    @EnvironmentObject var userAuthManager: UserManager
     
     var body: some View {
         TabView(selection: $selection) {
@@ -64,6 +75,11 @@ struct MainTabView: View {
                     Label("Notifications", systemImage: "bell")
                 }
                 .tag(2)
+            SoldItemsView()
+                .tabItem {
+                    Label("bids", systemImage: "cart")
+                }
+                .tag(3)
         }
         .onAppear {
             UITabBar.appearance().backgroundColor = UIColor(Color(hex:"f4e9dc"))
@@ -74,7 +90,7 @@ struct MainTabView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView().environmentObject(UserAuthenticationManager())
+        ContentView().environmentObject(UserManager())
     }
 }
 

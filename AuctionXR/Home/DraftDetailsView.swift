@@ -220,7 +220,7 @@ struct SecondaryButtonStyle: ButtonStyle {
             .background(Color.blue)
             .cornerRadius(8)
             .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
-            .animation(.easeInOut(duration: 0.1))
+            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed) // Use animation(_:value:)
     }
 }
 
@@ -228,8 +228,6 @@ struct SecondaryButtonStyle: ButtonStyle {
 struct DraftDetailsView_Previews: PreviewProvider {
     static var previews: some View {
         let viewModel = ArtifactsViewModel()
-        let imageURL = URL(string: "https://example.com/image.jpg")!
-        let videoURL = URL(string: "https://example.com/video.mp4")!
         let artifact = ArtifactsData(
             id: UUID(),
             title: "Sample Artifact",
@@ -240,14 +238,17 @@ struct DraftDetailsView_Previews: PreviewProvider {
             likes: [],
             dislikes: [],
             currentBidder: "",
-            rating: 0.0,
+            rating: 4.0,
             isBidded: false,
             bidEndDate: Date(),
-            imageURLs: [imageURL],
-            videoURL: [videoURL],
+            imageURLs: [],
+            videoURL: [],
             category: "Sample Category",
             timestamp: Date()
         )
         return DraftDetailsView(viewModel: viewModel, artifact: artifact)
+            .previewLayout(.sizeThatFits)
+            .padding()
+            .environment(\.colorScheme, .light)
     }
 }

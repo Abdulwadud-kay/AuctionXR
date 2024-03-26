@@ -10,17 +10,33 @@ import SwiftUI
 
 
 struct HistoryView: View {
+@EnvironmentObject var userAuthManager: UserManager
+    // Expanded data model to include an 'isSold' flag
+    let items = [
+        Item(title: "Vintage Clock", price: 150.00, buyer: "Alice", isSold: true),
+        Item(title: "Antique Painting", price: 300.00, buyer: "Bob", isSold: false)
+    ]
+
     var body: some View {
-        VStack {
-            Text("History")
-                .font(.title)
-            // You can add more UI components to display the history
-            Text("History content goes here.")
-                .padding()
-            // Add other components related to the history view
+        List(items, id: \.title) { item in
+            VStack(alignment: .leading) {
+                Text(item.title)
+                    .font(.headline)
+                Text("\(item.isSold ? "Sold" : "Bought") for $\(item.price, specifier: "%.2f")")
+                    .font(.subheadline)
+                Text(item.isSold ? "Buyer: \(item.buyer)" : "Seller: \(item.buyer)")
+                    .font(.subheadline)
+            }
         }
-        .navigationBarTitle("History", displayMode: .inline)
+        .navigationBarTitle("Transactions")
     }
+}
+
+struct Item {
+    let title: String
+    let price: Double
+    let buyer: String // Could be 'seller' or 'buyer' based on the context
+    let isSold: Bool  // True if sold, false if bought
 }
 
 struct HistoryView_Previews: PreviewProvider {

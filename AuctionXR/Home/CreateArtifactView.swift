@@ -38,9 +38,9 @@ struct CreateArtifactView: View {
     let maxBidDuration: TimeInterval = 2 * 365 * 24 * 60 * 60 // 2 years in seconds
     let bidEndDateRange: ClosedRange<Date> = Date()...(Date() + 2 * 365 * 24 * 60 * 60) // From now to 2 years in the future
     
-    let backgroundColor = Color(hex:"dbb88e") // Ensure you have a method to initialize Color with hex.
+    let backgroundColor = Color(hex:"#5729CE") // Ensure you have a method to initialize Color with hex.
     let  iconColor = Color(.white)
-    let gradientTop = Color(hex:"dbb88e")
+    let gradientTop = Color(.white)
     let gradientBottom = Color.white
     
     var body: some View {
@@ -114,7 +114,7 @@ struct CreateArtifactView: View {
                                     .font(.title)
                                     .foregroundColor(.white)
                                 Text("Add Image")
-                                    .foregroundColor(.white)
+                                    .foregroundColor(backgroundColor )
                                     .font(.caption)
                             }
                         }
@@ -128,7 +128,7 @@ struct CreateArtifactView: View {
                                 .font(.title)
                                 .foregroundColor(.white)
                             Text("Add Video")
-                                .foregroundColor(.white)
+                                .foregroundColor(backgroundColor )
                                 .font(.caption)
                         }
                     }
@@ -379,9 +379,9 @@ struct CreateArtifactView: View {
 }
 struct CreateArtifactView_Previews: PreviewProvider {
     static var previews: some View {
-        let userAuthManager = UserAuthenticationManager()
+        let userAuthManager = UserManager()
         // Assuming that isShowingCreateArtifactView is a Binding<Bool> and it should be the first argument
-        CreateArtifactView(isShowingCreateArtifactView: .constant(true), artifactsViewModel: ArtifactsViewModel(), userId: userAuthManager.userData.userId)
+        CreateArtifactView(isShowingCreateArtifactView: .constant(true), artifactsViewModel: ArtifactsViewModel(), userId: userAuthManager.userId)
     }
 }
 

@@ -5,15 +5,16 @@ import FirebaseFirestore
 struct RegisterViewController: View {
     @Environment(\.presentationMode) var presentationMode
     var showLogin: () -> Void
+    var registerSuccess: () -> Void
     @State private var username: String = ""
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var showError = false
     @State private var errorMessage = ""
-    @EnvironmentObject var userAuthManager: UserAuthenticationManager
+    @EnvironmentObject var userAuthManager: UserManager
 
-    let backgroundColor = Color(hex: "f4e9dc")
-    let buttonColor = Color(hex: "dbb88e")
+    let backgroundColor = Color(.white)
+    let buttonColor = Color(hex: "#5729CE")
     
     var body: some View {
         NavigationStack {
@@ -47,6 +48,7 @@ struct RegisterViewController: View {
             }
             .padding(.horizontal)
             .textFieldStyle(RoundedBorderTextFieldStyle())
+            .padding(.bottom, 8)
                 
                 if showError {
                     Text(errorMessage)
@@ -57,16 +59,16 @@ struct RegisterViewController: View {
                 Button("Register") {
                     registerUser()
                 }
-                .padding(8)
+                .padding(.all,15)
                 .background(buttonColor)
                 .foregroundColor(.white)
-                .cornerRadius(8)
+                .cornerRadius(30)
                 .padding(.horizontal)
                 
 
                 
-                
-                
+                Spacer()
+                    .frame(height: 150)
                 // Navigation to Login on Successful Registration
                 Button("Already have an account? Login") {
                                     showLogin()
@@ -82,39 +84,38 @@ struct RegisterViewController: View {
                     }
                 
     func registerUser() {
-        Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
-            if let user = authResult?.user {
-                let db = Firestore.firestore()
-                db.collection("users").document(user.uid).setData([
-                    "username": username,
-                    "email": email
-                ]) { error in
-                    if let error = error {
-                        print("Error registering user:", error.localizedDescription) // Print error message to console
-                        self.showError = true
-                        self.errorMessage = error.localizedDescription
-
-                    } else {
-                        DispatchQueue.main.async {
-                            
-                            self.userAuthManager.appState = .loggedIn
-                            self.userAuthManager.fetchUserDetails(user)
-                            self.presentationMode.wrappedValue.dismiss()
+            Auth.auth().createUser(withEmail: email, password: password) { authResult, error in
+                if let user = authResult?.user {
+                    let db = Firestore.firestore()
+                    db.collection("users").document(user.uid).setData([
+                        "username": username,
+                        "email": email,
+                        "isAccountSetup": false // Initialize the account setup status
+                    ]) { error in
+                        if let error = error {
+                            print("Error registering user:", error.localizedDescription)
+                            self.showError = true
+                            self.errorMessage = error.localizedDescription
+                        } else {
+                            DispatchQueue.main.async {
+                                self.userAuthManager.appState = .loggedIn
+                                self.userAuthManager.fetchUserDetails(user)
+                                self.presentationMode.wrappedValue.dismiss()
+                                self.registerSuccess() // Call the closure upon successful registration
+                            }
                         }
                     }
+                } else if let error = error {
+                    self.showError = true
+                    self.errorMessage = error.localizedDescription
                 }
-                
-            } else if let error = error {
-                self.showError = true
-                self.errorMessage = error.localizedDescription
             }
         }
-        
     }
+
+    struct RegisterViewController_Previews: PreviewProvider {
+        static var previews: some View {
+            RegisterViewController(showLogin: {}, registerSuccess: {}) // Provide an empty closure
+                .environmentObject(UserManager())
+        }
     }
-struct RegisterViewController_Previews: PreviewProvider {
-    static var previews: some View {
-        RegisterViewController(showLogin: {}) // Provide an empty closure
-            .environmentObject(UserAuthenticationManager())
-    }
-}
