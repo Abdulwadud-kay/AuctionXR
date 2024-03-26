@@ -116,6 +116,7 @@ struct CreateArtifactView: View {
                                 .font(.title)
                                 .foregroundColor(.white)
                                 .shadow(color: .gray, radius: 2, x: 0, y: 2)
+                                
                             Text("")
                                 .foregroundColor(backgroundColor )
                                 .font(.caption)
@@ -131,6 +132,7 @@ struct CreateArtifactView: View {
                                 .font(.title)
                                 .foregroundColor(.white)
                                 .shadow(color: .gray, radius: 2, x: 0, y: 2)
+                                .padding(.leading, 240)
                             Text("")
                                 .foregroundColor(backgroundColor )
                                 .font(.caption)
@@ -156,14 +158,17 @@ struct CreateArtifactView: View {
                                     Image(systemName: "xmark.circle.fill")
                                         .foregroundColor(.black)
                                         .padding(3)
+                                       
                                 }
                                 .padding(.trailing, 5)
+                                
                             }
                         }
                     }
                 }
                 .frame(height: 120)
                 .padding(.vertical)
+                
                 
                 if let selectedVideoURL = selectedVideoURL {
                     VideoPlayer(player: AVPlayer(url: selectedVideoURL))
@@ -180,9 +185,9 @@ struct CreateArtifactView: View {
                 HStack(spacing: 20) {
                     Text("Save for Later")
                         .font(.subheadline)
-                        .foregroundColor(isSaveBlinking ? .white : Color(backgroundColor)) // Change color for blink effect
+                        .foregroundColor(isSaveBlinking ? .white : Color(backgroundColor))
                         .onTapGesture {
-                            isSaveBlinking.toggle() // Toggle blink state
+                            isSaveBlinking.toggle()
                             saveDraft()
                         }
                     
@@ -192,16 +197,16 @@ struct CreateArtifactView: View {
                     .disabled(!isFormComplete)
                     .padding()
                     .frame(width: 100, height: 40)
-                    .background(isFormComplete ? Color(#colorLiteral(red: 0.3411764706, green: 0.1607843137, blue: 0.8078431373, alpha: 1)) : Color.gray) // Set background color based on form completion
+                    .background(isFormComplete ? Color(#colorLiteral(red: 0.3411764706, green: 0.1607843137, blue: 0.8078431373, alpha: 1)) : Color.gray)
                     .cornerRadius(25)
                     .foregroundColor(.white)
                     .opacity(isBlinking ? 0.0 : 1.0)
-
-                
- 
+                    .padding(.leading, 120)
                 }
                 .padding([.horizontal, .bottom])
                 .padding(.top, -10)
+                .padding(.horizontal, 10) // Add horizontal padding
+
             }
             .background(LinearGradient(gradient: Gradient(colors: [gradientTop, gradientBottom]), startPoint: .top, endPoint: .bottom).edgesIgnoringSafeArea(.all))
             .sheet(isPresented: $pickerPresented) {
@@ -215,7 +220,7 @@ struct CreateArtifactView: View {
     }
     
     private var isFormComplete: Bool {
-        !title.isEmpty && !description.isEmpty && !startingPrice.isEmpty && selectedCategory != "Select Category" && acceptTerms && (!selectedImages.isEmpty || selectedVideoURL != nil)
+        !title.isEmpty && !description.isEmpty && !startingPrice.isEmpty && selectedCategory != "Select Category" && acceptTerms && (!selectedImages.isEmpty)
     }
     private func saveDraft() {
         uploadMedia(images: selectedImages, videos: selectedVideoURL != nil ? [selectedVideoURL!] : []) { imageURLs, videoURLs in
