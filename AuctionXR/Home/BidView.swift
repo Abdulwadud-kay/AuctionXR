@@ -152,14 +152,14 @@ struct BidView: View {
                 startingPrice: 100,
                 currentBid: 150,
                 isSold: false,
-                likes: [], // Provide empty arrays for likes and dislikes
+                likes: [], 
                 dislikes: [],
                 currentBidder: "Current Bidder",
                 rating: 0.0,
                 isBidded: false,
                 bidEndDate: Date(),
-                imageURLs: [],
-                videoURL: [],
+                imageUrls: [],
+                videoUrl: [],
                 category: "Category",
                 timestamp: Date() // Provide a timestamp or mark it as optional
             ))

@@ -2,10 +2,12 @@
 
 
 
+// ContentView.swift
+
+
 import SwiftUI
 
 struct ContentView: View {
-    var viewModel = ArtifactsViewModel()
     @EnvironmentObject var userAuthManager: UserManager
 
     var body: some View {
@@ -13,37 +15,29 @@ struct ContentView: View {
         case .initial, .loggedOut:
             AuthenticationView().environmentObject(userAuthManager)
         case .loggedIn:
-            MainTabView()  // Replace with your actual MainTabView
+            MainTabView().environmentObject(userAuthManager)
         }
     }
-    
-    
 }
 
-
-
 struct AuthenticationView: View {
-    @State private var showingRegister = false // Use this state to track whether to show the registration view
     @EnvironmentObject var userAuthManager: UserManager
+    @State private var showingRegister = false
 
     var body: some View {
-        if showingRegister {
-            RegisterViewController(showLogin: { showingRegister = false }) {
-                // Handle successful registration
-                self.userAuthManager.verifyAccountSetup() // Verify account setup after successful registration
-                self.showingRegister = false // Dismiss the registration view
-            }
-            .environmentObject(userAuthManager)
-        } else if userAuthManager.isLoggedIn {
-            if userAuthManager.isAccountSetup {
-                MainTabView()
-            } else {
-                AccountDetailsView()
-                    .environmentObject(userAuthManager)
-            }
+        if userAuthManager.isLoggedIn {
+            MainTabView()
         } else {
-            LoginViewController(showRegister: { showingRegister = true })
+            LoginViewController(showRegister: { self.showingRegister = true })
                 .environmentObject(userAuthManager)
+                .sheet(isPresented: $showingRegister, onDismiss: {
+                    self.showingRegister = false
+                }) {
+                    RegisterViewController {
+                        self.userAuthManager.verifyAccountSetup()
+                    }
+                    .environmentObject(userAuthManager)
+                }
         }
     }
 }

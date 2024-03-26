@@ -20,7 +20,6 @@ struct ArtifactDraftView: View {
     @ObservedObject var viewModel: ArtifactsViewModel
     var artifact: ArtifactsData
     @State private var currentImageIndex = 0
-    @State private var image: Image?
     let timer = Timer.publish(every: 900, on: .main, in: .common).autoconnect() // 900 seconds = 15 minutes
     
     var body: some View {
@@ -31,20 +30,15 @@ struct ArtifactDraftView: View {
             .hidden()
             
             Button(action: {
-                self.currentImageIndex = (self.currentImageIndex + 1) % artifact.imageURLs.count
+                self.currentImageIndex = (self.currentImageIndex + 1) % artifact.imageUrls.count
             }) {
-                // Display artifact image with AsyncImage
-                AsyncImage(url: artifact.imageURLs[currentImageIndex]) { image in
-                    image
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: UIScreen.main.bounds.width / 2 - 30, height: 200)
-                        .cornerRadius(10)
-                        .shadow(color: .gray, radius: 4, x: 0, y: 2)
-                } placeholder: {
-                    ProgressView()
-                }
-
+                // Display artifact image with Image
+                Image(uiImage: UIImage(data: Data(base64Encoded: artifact.imageUrls[currentImageIndex]) ?? Data()) ?? UIImage()) // Convert base64 string to Data, then to UIImage
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: UIScreen.main.bounds.width / 2 - 30, height: 200)
+                    .cornerRadius(10)
+                    .shadow(color: .gray, radius: 4, x: 0, y: 2)
             }
             
             Text(artifact.title)
@@ -59,12 +53,14 @@ struct ArtifactDraftView: View {
             
             // Display rating stars
             RatingStarsView(rating: artifact.rating)
+                .padding(.all, 10)
+                .cornerRadius(10)
+                .frame(width: UIScreen.main.bounds.width / 2 - 20)
         }
         // Handle timer for image rotation
         .onReceive(timer) { _ in
-            self.currentImageIndex = (self.currentImageIndex + 1) % (artifact.imageURLs.count > 0 ? artifact.imageURLs.count : 1)
+            self.currentImageIndex = (self.currentImageIndex + 1) % (artifact.imageUrls.count > 0 ? artifact.imageUrls.count : 1)
         }
-
     }
 }
 
@@ -72,8 +68,8 @@ struct ArtifactDraftView: View {
 struct ArtifactDraftView_Previews: PreviewProvider {
     static var previews: some View {
         let viewModel = ArtifactsViewModel()
-        let imageURL = URL(string: "https://example.com/image.jpg")!
-        let videoURL = URL(string: "https://example.com/video.mp4")!
+        let imageUrl = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAAAAAA..."
+        let videoUrl = "https://www.example.com/sample-video.mp4"
         let artifact = ArtifactsData(
             id: UUID(),
             title: "Sample Artifact",
@@ -87,11 +83,15 @@ struct ArtifactDraftView_Previews: PreviewProvider {
             rating: 0.0,
             isBidded: false,
             bidEndDate: Date(),
-            imageURLs: [imageURL],
-            videoURL: [videoURL],
+            imageUrls: [imageUrl],
+            videoUrl: [videoUrl],
             category: "Sample Category",
-            timestamp: Date() // Add the missing parameter
+            timestamp: Date()
         )
-        return ArtifactDraftView(viewModel: viewModel, artifact: artifact)
+        
+        return NavigationView {
+            ArtifactDraftView(viewModel: viewModel, artifact: artifact)
+                .environmentObject(viewModel)
+        }
     }
 }

@@ -62,6 +62,7 @@ struct CreateArtifactView: View {
                         .overlay(RoundedRectangle(cornerRadius: 5).stroke(Color.gray, lineWidth: 0))
                         .padding()
                         .foregroundColor(.black) // Placeholder text color
+                        .shadow(color: .gray, radius: 2, x: 0, y: 2) // Apply shadow
                 }
                 
                 TextField("Starting Price", text: $startingPrice)
@@ -108,17 +109,19 @@ struct CreateArtifactView: View {
                 
                 HStack(spacing: 30) { // Adjust spacing as needed
                     Button(action: {
-                        pickerPresented = true                    }) {
-                            VStack {
-                                Image(systemName: "camera.fill")
-                                    .font(.title)
-                                    .foregroundColor(.white)
-                                Text("Add Image")
-                                    .foregroundColor(backgroundColor )
-                                    .font(.caption)
-                            }
+                        pickerPresented = true
+                    }) {
+                        VStack {
+                            Image(systemName: "camera.fill")
+                                .font(.title)
+                                .foregroundColor(.white)
+                                .shadow(color: .gray, radius: 2, x: 0, y: 2)
+                            Text("")
+                                .foregroundColor(backgroundColor )
+                                .font(.caption)
                         }
-                        .disabled(selectedImages.count >= 4)
+                    }
+                    .disabled(selectedImages.count >= 4)
                     
                     Button(action: {
                         showVideoPicker = true
@@ -127,7 +130,8 @@ struct CreateArtifactView: View {
                             Image(systemName: "video.fill")
                                 .font(.title)
                                 .foregroundColor(.white)
-                            Text("Add Video")
+                                .shadow(color: .gray, radius: 2, x: 0, y: 2)
+                            Text("")
                                 .foregroundColor(backgroundColor )
                                 .font(.caption)
                         }
@@ -141,8 +145,6 @@ struct CreateArtifactView: View {
                         ForEach(selectedImages.indices, id: \.self) { index in
                             ZStack(alignment: .topTrailing) {
                                 Image(uiImage: selectedImages[index])
-
-
                                     .resizable()
                                     .scaledToFit()
                                     .frame(width: 100, height: 100)
@@ -175,10 +177,9 @@ struct CreateArtifactView: View {
                             .padding(3)
                     }
                 }
-                VStack(spacing: 20) {
+                HStack(spacing: 20) {
                     Text("Save for Later")
                         .font(.subheadline)
-                        .disabled(!isFormComplete)
                         .foregroundColor(isSaveBlinking ? .white : Color(backgroundColor)) // Change color for blink effect
                         .onTapGesture {
                             isSaveBlinking.toggle() // Toggle blink state
@@ -191,10 +192,13 @@ struct CreateArtifactView: View {
                     .disabled(!isFormComplete)
                     .padding()
                     .frame(width: 100, height: 40)
-                    .background(backgroundColor)
+                    .background(isFormComplete ? Color(#colorLiteral(red: 0.3411764706, green: 0.1607843137, blue: 0.8078431373, alpha: 1)) : Color.gray) // Set background color based on form completion
                     .cornerRadius(25)
                     .foregroundColor(.white)
-                    .opacity(isBlinking ? 0.0 : 1.0) // Apply blinking effect
+                    .opacity(isBlinking ? 0.0 : 1.0)
+
+                
+ 
                 }
                 .padding([.horizontal, .bottom])
                 .padding(.top, -10)
@@ -209,15 +213,12 @@ struct CreateArtifactView: View {
             }
         }
     }
-
+    
     private var isFormComplete: Bool {
         !title.isEmpty && !description.isEmpty && !startingPrice.isEmpty && selectedCategory != "Select Category" && acceptTerms && (!selectedImages.isEmpty || selectedVideoURL != nil)
     }
     private func saveDraft() {
-        uploadMedia(images: selectedImages, videos: selectedVideoURL != nil ? [selectedVideoURL!] : []) { imageURLs, videoURL in
-
-            
-            // Create the ArtifactsData instance here
+        uploadMedia(images: selectedImages, videos: selectedVideoURL != nil ? [selectedVideoURL!] : []) { imageURLs, videoURLs in
             let draftData: [String: Any] = [
                 "id": UUID().uuidString,
                 "title": self.title,
@@ -225,35 +226,32 @@ struct CreateArtifactView: View {
                 "startingPrice": self.startingPrice,
                 "rating": defaultRating,
                 "bidEndDate": Timestamp(date: self.bidEndDate),
-                "imageURLs": imageURLs,
-                "videoURL": videoURL,
-
+                "imageUrls": imageURLs,
+                "videoUrls": videoURLs,
                 "category": self.selectedCategory,
                 "userID": self.userId,
                 "timestamp": FieldValue.serverTimestamp()
             ]
-
-
+            
             let db = Firestore.firestore()
-            db.collection("users").document(self.userId).collection("drafts").addDocument(data: draftData) { error in
-                if let error = error {
-                    print("Error saving draft: \(error.localizedDescription)")
-                    // Inform the user about the error, e.g., show an alert
-                } else {
-                    print("Draft saved successfully")
-                    // Provide feedback to the user, e.g., display a success message
-                    
-                    withAnimation(.easeInOut(duration: 0.5).repeatCount(3, autoreverses: true)) {
-                        isBlinking = true
-                    }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                        isBlinking = false
-                        isShowingCreateArtifactView = false // Dismiss the view here
+                    db.collection("users").document(self.userId).collection("drafts").addDocument(data: draftData) { error in
+                        if let error = error {
+                            print("Error saving draft: \(error.localizedDescription)")
+                            // Inform the user about the error, e.g., show an alert
+                        } else {
+                            print("Draft saved successfully")
+                            // Provide feedback to the user, e.g., display a success message
+                            withAnimation(.easeInOut(duration: 0.5).repeatCount(3, autoreverses: true)) {
+                                isBlinking = true
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                                isBlinking = false
+                                isShowingCreateArtifactView = false // Dismiss the view here
+                            }
+                        }
                     }
                 }
             }
-        }
-    }
 
     private func submitArtifact() {
         guard isFormComplete else {
@@ -262,10 +260,7 @@ struct CreateArtifactView: View {
             return
         }
         
-        uploadMedia(images: selectedImages, videos: selectedVideoURL != nil ? [selectedVideoURL!] : []) { imageURLs, videoURL in
-
-            
-            // Create the ArtifactsData instance here
+        uploadMedia(images: selectedImages, videos: selectedVideoURL != nil ? [selectedVideoURL!] : []) { imageURLs, videoURLs in
             let artifactData: [String: Any] = [
                 "id": UUID().uuidString,
                 "title": self.title,
@@ -279,16 +274,12 @@ struct CreateArtifactView: View {
                 "rating": defaultRating,
                 "isBidded": defaultIsBidded,
                 "bidEndDate": Timestamp(date: self.bidEndDate),
-                "imageURLs": imageURLs,
-                "videoURL": videoURL,
-
-
+                "imageUrls": imageURLs,
+                "videoUrls": videoURLs,
                 "category": self.selectedCategory,
                 "userID": self.userId,
                 "timestamp": FieldValue.serverTimestamp()
             ]
-
-
             let db = Firestore.firestore()
             let artifactRef = db.collection("users").document(self.userId).collection("posts").document() // Generate a new document ID
             
@@ -299,7 +290,6 @@ struct CreateArtifactView: View {
                 } else {
                     print("Artifact submitted successfully")
                     // Provide feedback to the user, e.g., display a success message
-
                     withAnimation(.easeInOut(duration: 0.5).repeatCount(3, autoreverses: true)) {
                         isBlinking = true
                     }
@@ -311,69 +301,68 @@ struct CreateArtifactView: View {
             }
         }
     }
-
-
+    
+    
+    
     
     func uploadMedia(images: [UIImage], videos: [URL], completion: @escaping ([String], [String]) -> Void) {
         let storage = Storage.storage()
-        var imageURLs: [String] = []
-        var videoURLs: [String] = []
-        
         let dispatchGroup = DispatchGroup()
+        var imageUrls: [String] = []
+        var videoUrls: [String] = []
         
         for image in images {
             dispatchGroup.enter()
-            let imageData = image.jpegData(compressionQuality: 0.8)!
-            let imageRef = storage.reference().child("images/\(UUID().uuidString).jpg")
-            
-            imageRef.putData(imageData, metadata: nil) { (metadata, error) in
+            let imageName = UUID().uuidString + ".jpg"
+            let imageRef = storage.reference().child("images/\(imageName)")
+            guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+                dispatchGroup.leave()
+                continue
+            }
+            let metadata = StorageMetadata()
+            metadata.contentType = "image/jpeg"
+            imageRef.putData(imageData, metadata: metadata) { (_, error) in
                 if let error = error {
                     print("Error uploading image: \(error.localizedDescription)")
-                    dispatchGroup.leave()
-                    return
-                }
-                imageRef.downloadURL { (url, error) in
-                    if let error = error {
-                        print("Error fetching image download URL: \(error.localizedDescription)")
+                } else {
+                    imageRef.downloadURL { (url, error) in
+                        if let imageUrl = url?.absoluteString {
+                            imageUrls.append(imageUrl)
+                        }
                         dispatchGroup.leave()
-                        return
                     }
-                    if let downloadURL = url?.absoluteString {
-                        imageURLs.append(downloadURL)
-                        print("Image uploaded successfully. Download URL: \(downloadURL)")
-                    }
-                    dispatchGroup.leave()
                 }
             }
         }
         
         for video in videos {
             dispatchGroup.enter()
-            let videoRef = storage.reference().child("videos/\(UUID().uuidString).mp4")
-            
-            videoRef.putFile(from: video, metadata: nil) { (metadata, error) in
-                if let error = error {
-                    print("Error uploading video: \(error.localizedDescription)")
-                    dispatchGroup.leave()
-                    return
-                }
-                videoRef.downloadURL { (url, error) in
+            let videoName = UUID().uuidString + ".mp4"
+            let videoRef = storage.reference().child("videos/\(videoName)")
+            do {
+                let videoData = try Data(contentsOf: video)
+                let metadata = StorageMetadata()
+                metadata.contentType = "video/mp4"
+                videoRef.putData(videoData, metadata: metadata) { (_, error) in
                     if let error = error {
-                        print("Error fetching video download URL: \(error.localizedDescription)")
-                        dispatchGroup.leave()
-                        return
+                        print("Error uploading video: \(error.localizedDescription)")
+                    } else {
+                        videoRef.downloadURL { (url, error) in
+                            if let videoUrl = url?.absoluteString {
+                                videoUrls.append(videoUrl)
+                            }
+                            dispatchGroup.leave()
+                        }
                     }
-                    if let downloadURL = url?.absoluteString {
-                        videoURLs.append(downloadURL)
-                        print("Video uploaded successfully. Download URL: \(downloadURL)")
-                    }
-                    dispatchGroup.leave()
                 }
+            } catch {
+                print("Error loading video data: \(error.localizedDescription)")
+                dispatchGroup.leave()
             }
         }
         
         dispatchGroup.notify(queue: .main) {
-            completion(imageURLs, videoURLs)
+            completion(imageUrls, videoUrls)
         }
     }
 }

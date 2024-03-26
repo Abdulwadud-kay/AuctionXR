@@ -1,7 +1,4 @@
-// ArtifactDetailView.swift
-
 import SwiftUI
-import FirebaseAuth
 
 struct ArtifactDetailView: View {
     @ObservedObject var viewModel: ArtifactsViewModel
@@ -12,11 +9,20 @@ struct ArtifactDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 // Media carousel and other details
-                MediaCarouselView(images: artifact.imageURLs, videos: artifact.videoURL ?? [], action: { _, _ in })
-                    .frame(height: 300)
-                    .cornerRadius(10)
-                    .shadow(radius: 5)
-                
+                if !artifact.imageUrls.isEmpty,
+                   let imageUrl = artifact.imageUrls.first, // Take the first image URL
+                   let uiImage = UIImage(data: Data(base64Encoded: imageUrl) ?? Data()) {
+                    MediaCarouselView(images: [uiImage], videos: artifact.videoUrl ?? []) { _, _ in }
+                        .frame(height: 300)
+                        .cornerRadius(10)
+                        .shadow(radius: 5)
+                } else {
+                    // Handle case where artifact has no image URLs
+                    Text("No media available")
+                        .foregroundColor(.secondary)
+                        .padding()
+                }
+
                 CountdownTimerView(endTime: artifact.bidEndDate)
                     .padding(.vertical)
                 
@@ -105,6 +111,8 @@ struct ArtifactDetailView: View {
 struct ArtifactDetailView_Previews: PreviewProvider {
     static var previews: some View {
         let viewModel = ArtifactsViewModel()
+        let imageUrl = "sample_image_url"
+        let videoUrl = "sample_video_url"
         let artifact = ArtifactsData(
             id: UUID(),
             title: "Sample Artifact",
@@ -115,15 +123,14 @@ struct ArtifactDetailView_Previews: PreviewProvider {
             likes: [],
             dislikes: [],
             currentBidder: "",
-            rating: 0.0,
+            rating: 4.0,
             isBidded: false,
             bidEndDate: Date(),
-            imageURLs: [],
-            videoURL: [],
+            imageUrls: [imageUrl],
+            videoUrl: [videoUrl],
             category: "Sample Category",
             timestamp: Date()
         )
-        
         return NavigationView {
             ArtifactDetailView(viewModel: viewModel, artifact: artifact)
                 .environmentObject(viewModel)

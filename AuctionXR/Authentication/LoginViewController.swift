@@ -56,7 +56,7 @@ struct LoginViewController: View {
                 Spacer()
                     .frame(height: 10)
                 Button("Don't have an account? Register here") {
-                    showRegister()
+                    self.showRegister()
                 }
                 .foregroundColor(buttonColor)
                 .underline()

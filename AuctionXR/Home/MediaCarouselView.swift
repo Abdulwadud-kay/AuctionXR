@@ -1,12 +1,4 @@
-//
-//  MediaCarouselView.swift
-//  AuctionXR
-//
-//  Created by Abdulwadud Abdulkadir on 3/6/24.
-//
-
 import SwiftUI
-
 import AVKit
 import AVFoundation
 
@@ -17,46 +9,26 @@ enum MediaType {
 
 // VideoPlayerView that plays a video from the app bundle
 struct VideoPlayerView: View {
-    var videoName: String
+    var videoURLString: String
     
     var player: AVPlayer {
-        guard let url = videoURL else {
-            fatalError("Video \(videoName) not found")
-        }
-        return AVPlayer(url: url)
+        return AVPlayer(playerItem: AVPlayerItem(url: URL(string: videoURLString)!))
     }
     
-    var videoURL: URL? {
-        let fileExtensions = ["mp4", "mov", "avi", "mkv"] // Add more file extensions if needed
-        
-        for ext in fileExtensions {
-            if let path = Bundle.main.path(forResource: videoName, ofType: ext) {
-                return URL(fileURLWithPath: path)
-            }
-        }
-        
-        print("Video \(videoName) not found")
-        return nil
-    }
-
     var body: some View {
-        if let videoURL = videoURL {
-            VideoPlayer(player: player)
-                .onAppear {
-                    player.play()
-                }
-                .onDisappear {
-                    player.pause()
-                }
-        } else {
-            Text("Video not found")
-        }
+        VideoPlayer(player: player)
+            .onAppear {
+                player.play()
+            }
+            .onDisappear {
+                player.pause()
+            }
     }
 }
 
 struct MediaCarouselView: View {
-    var images: [URL]
-    var videos: [URL?]
+    var images: [UIImage]
+    var videos: [String?] // Change type to String?
     var action: (Int, Bool) -> Void
     @State private var currentIndex: Int = 0
 
@@ -65,25 +37,19 @@ struct MediaCarouselView: View {
             ZStack(alignment: .bottomTrailing) {
                 TabView(selection: $currentIndex) {
                     ForEach(0..<images.count, id: \.self) { index in
-                        Image(uiImage: UIImage(contentsOfFile: images[index].path)!)
+                        Image(uiImage: images[index])
                             .resizable()
                             .scaledToFit()
                             .frame(width: geometry.size.width)
                             .tag(index)
                     }
                     ForEach(0..<videos.count, id: \.self) { index in
-                        if let videoURL = videos[index] {
-                            let lastPathComponent = videoURL.lastPathComponent
-                            VideoPlayerView(videoName: lastPathComponent)
+                        if let videoURLString = videos[index] {
+                            VideoPlayerView(videoURLString: videoURLString) // Pass video URL string
                                 .frame(width: geometry.size.width)
                                 .tag(images.count + index)
                         }
-                    
-
                     }
-
-
-
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
             }

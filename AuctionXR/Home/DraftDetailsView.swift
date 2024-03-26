@@ -20,8 +20,6 @@ struct DraftDetailsView: View {
     @State private var selectedImageURL: UIImage?
     @State private var selectedVideoURL: URL?
     
-    
-    
     init(viewModel: ArtifactsViewModel, artifact: ArtifactsData) {
         self.viewModel = viewModel
         self.artifact = artifact
@@ -37,20 +35,20 @@ struct DraftDetailsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading) {
-                MediaCarouselView(images: artifact.imageURLs, videos: artifact.videoURL ?? []) { index, isVideo in
-                    if isEditing {
-                        selectedImageIndex = index
-                        if isVideo {
-                            showVideoPicker.toggle()
-                        } else {
-                            showImagePicker.toggle()
-                        }
-                    }
+                if !artifact.imageUrls.isEmpty,
+                   let imageUrl = artifact.imageUrls.first, // Take the first image URL
+                   let uiImage = UIImage(data: Data(base64Encoded: imageUrl) ?? Data()) {
+                    MediaCarouselView(images: [uiImage], videos: artifact.videoUrl ?? []) { _, _ in }
+                        .frame(height: 300)
+                        .cornerRadius(10)
+                        .shadow(radius: 5)
+                } else {
+                    // Handle case where artifact has no image URLs
+                    Text("No media available")
+                        .foregroundColor(.secondary)
+                        .padding()
                 }
 
-                .frame(height: 300)
-                .cornerRadius(10)
-                .shadow(radius: 5)
                 
                 HStack {
                     TextField("Title", text: $editedTitle)
@@ -121,7 +119,6 @@ struct DraftDetailsView: View {
                             updateArtifact()
                             isEditing.toggle()
                         }
-
                         .buttonStyle(PrimaryButtonStyle())
                         Button("Cancel") {
                             resetEditedDetails()
@@ -136,6 +133,7 @@ struct DraftDetailsView: View {
                     }
                 }
                 .padding(.bottom)
+
             }
             .padding(.horizontal)
         }
@@ -177,11 +175,6 @@ struct DraftDetailsView: View {
     }
 
     private func updateArtifact() {
-        guard let videoURL = artifact.videoURL else {
-                // Handle the case where videoURL is nil, if needed
-                return
-            }
-        
         let updatedArtifact = ArtifactsData(
             id: artifact.id,
             title: editedTitle,
@@ -195,8 +188,8 @@ struct DraftDetailsView: View {
             rating: artifact.rating,
             isBidded: artifact.isBidded,
             bidEndDate: editedBidEndTime,
-            imageURLs: artifact.imageURLs,
-            videoURL: videoURL,
+            imageUrls: artifact.imageUrls,
+            videoUrl: artifact.videoUrl,
             category: selectedCategory,
             timestamp: artifact.timestamp
         )
@@ -241,14 +234,12 @@ struct DraftDetailsView_Previews: PreviewProvider {
             rating: 4.0,
             isBidded: false,
             bidEndDate: Date(),
-            imageURLs: [],
-            videoURL: [],
+            imageUrls: [],
+            videoUrl: [],
             category: "Sample Category",
             timestamp: Date()
         )
         return DraftDetailsView(viewModel: viewModel, artifact: artifact)
-            .previewLayout(.sizeThatFits)
-            .padding()
-            .environment(\.colorScheme, .light)
+            
     }
 }
