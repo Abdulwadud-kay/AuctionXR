@@ -1,23 +1,16 @@
-//
-//  PreviewView.swift
-//  AuctionX
-//
-//  Created by Abdulwadud Abdulkadir on 1/23/24.
-//
-
 import SwiftUI
 
 struct PreviewView: View {
-    let backgroundColor = Color(hex: "f4e9dc")
-
     var body: some View {
         ZStack {
-            backgroundColor.edgesIgnoringSafeArea(.all)
-            Text("AUCTIONX")
-                .font(.system(size: 50, weight: .bold, design: .rounded)) // Larger font size
-                .foregroundColor(Color.white) // White text color
-                .frame(maxWidth: .infinity, maxHeight: .infinity) // Full screen
-                .background(Color("dbb88e").cornerRadius(15)) // Rounded edges with custom color
+            Color(.white).edgesIgnoringSafeArea(.all) // Set background color
+            
+            // Logo
+            Image("auctionbox") // Assuming "auctionbox" is the name of your logo asset in Assets.xcassets
+                .resizable()
+                .scaledToFit()
+                .frame(width: 300, height: 300)// Adjust size as needed
+                .foregroundColor(.white) // Set logo color
         }
     }
 }
@@ -27,4 +20,3 @@ struct PreviewView_Previews: PreviewProvider {
         PreviewView()
     }
 }
-

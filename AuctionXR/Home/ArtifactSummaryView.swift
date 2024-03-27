@@ -21,14 +21,14 @@ struct ArtifactSummaryView: View {
                    let uiImage = UIImage(data: imageData) {
                     Image(uiImage: uiImage)
                         .resizable()
-                        .scaledToFit()
-                        .frame(width: UIScreen.main.bounds.width / 2 - 30, height: 200)
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: UIScreen.main.bounds.width / 2 - 30, height: 100)
                         .cornerRadius(10)
                         .shadow(color: .gray, radius: 4, x: 0, y: 2)
                 } else {
                     // Placeholder image or loading indicator
                     Color.gray
-                        .frame(width: UIScreen.main.bounds.width / 2 - 30, height: 200)
+                        .frame(width: UIScreen.main.bounds.width / 2 - 30, height: 100)
                         .cornerRadius(10)
                         .shadow(color: .gray, radius: 4, x: 0, y: 2)
                 }

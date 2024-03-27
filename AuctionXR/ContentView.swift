@@ -9,18 +9,34 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var userAuthManager: UserManager
+    @State private var showingInitialView = true // Control whether to show PreviewView or not
 
     var body: some View {
-        
-        switch userAuthManager.appState {
-        case .initial, .loggedOut:
-            AuthenticationView().environmentObject(userAuthManager)
-        case .loggedIn:
-            MainTabView().environmentObject(userAuthManager)
+        // Check if showing the initial view
+        if showingInitialView {
+            PreviewView()
+                .environmentObject(userAuthManager)
+                .onAppear {
+                    // Use a timer to switch to the appropriate view after 4 seconds
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+                        showingInitialView = false
+                    }
+                }
+        } else {
+            // Switch to the appropriate view based on user's state
+            switch userAuthManager.appState {
+            case .loggedOut:
+                AuthenticationView().environmentObject(userAuthManager)
+            case .loggedIn:
+                MainTabView().environmentObject(userAuthManager)
+            default:
+                // Handle other states if needed
+                EmptyView()
+            }
         }
-        
     }
 }
+
 
 struct AuthenticationView: View {
     @EnvironmentObject var userAuthManager: UserManager
