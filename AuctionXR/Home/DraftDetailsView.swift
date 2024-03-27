@@ -35,19 +35,18 @@ struct DraftDetailsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading) {
-                if !artifact.imageUrls.isEmpty,
-                   let imageUrl = artifact.imageUrls.first, // Take the first image URL
-                   let uiImage = UIImage(data: Data(base64Encoded: imageUrl) ?? Data()) {
-                    MediaCarouselView(images: [uiImage], videos: artifact.videoUrl ?? []) { _, _ in }
+                if let imageUrls = artifact.imageUrls, !imageUrls.isEmpty {
+                    MediaCarouselView(images: imageUrls.compactMap { URL(string: $0) }, videos: artifact.videoUrl ?? []) { _, _ in }
                         .frame(height: 300)
                         .cornerRadius(10)
                         .shadow(radius: 5)
                 } else {
-                    // Handle case where artifact has no image URLs
+                    // Handle case where artifact has no image URLs or URLs are invalid
                     Text("No media available")
                         .foregroundColor(.secondary)
                         .padding()
                 }
+
 
                 
                 HStack {
@@ -175,26 +174,28 @@ struct DraftDetailsView: View {
     }
 
     private func updateArtifact() {
-        let updatedArtifact = ArtifactsData(
-            id: artifact.id,
-            title: editedTitle,
-            description: editedDescription,
-            startingPrice: editedStartingPrice,
-            currentBid: artifact.currentBid,
-            isSold: artifact.isSold,
-            likes: artifact.likes,
-            dislikes: artifact.dislikes,
-            currentBidder: artifact.currentBidder,
-            rating: artifact.rating,
-            isBidded: artifact.isBidded,
-            bidEndDate: editedBidEndTime,
-            imageUrls: artifact.imageUrls,
-            videoUrl: artifact.videoUrl,
-            category: selectedCategory,
-            timestamp: artifact.timestamp
-        )
-        
-        viewModel.updateArtifact([updatedArtifact])
+        let updatedArtifact = ArtifactsData(id: artifact.id.uuidString, data: [
+            "title": editedTitle,
+            "description": editedDescription,
+            "startingPrice": editedStartingPrice,
+            "currentBid": artifact.currentBid ?? 0.0, // Provide a default value
+            "isSold": artifact.isSold,
+            "likes": artifact.likes ?? [], // Provide a default value
+            "dislikes": artifact.dislikes ?? [], // Provide a default value
+            "currentBidder": artifact.currentBidder,
+            "rating": artifact.rating,
+            "isBidded": artifact.isBidded,
+            "bidEndDate": editedBidEndTime,
+            "imageUrls": artifact.imageUrls,
+            "videoUrl": artifact.videoUrl ?? [], // Provide a default value
+            "category": selectedCategory,
+            "timestamp": artifact.timestamp ?? Date(), // Provide a default value
+            "userID": artifact.userID
+        ])
+        if let updatedArtifact = updatedArtifact {
+            viewModel.updateArtifact([updatedArtifact])
+        }
+
     }
 
     private func resetEditedDetails() {
@@ -218,28 +219,28 @@ struct SecondaryButtonStyle: ButtonStyle {
 }
 
 
-struct DraftDetailsView_Previews: PreviewProvider {
-    static var previews: some View {
-        let viewModel = ArtifactsViewModel()
-        let artifact = ArtifactsData(
-            id: UUID(),
-            title: "Sample Artifact",
-            description: "This is a sample artifact",
-            startingPrice: 0.0,
-            currentBid: 100.0,
-            isSold: false,
-            likes: [],
-            dislikes: [],
-            currentBidder: "",
-            rating: 4.0,
-            isBidded: false,
-            bidEndDate: Date(),
-            imageUrls: [],
-            videoUrl: [],
-            category: "Sample Category",
-            timestamp: Date()
-        )
-        return DraftDetailsView(viewModel: viewModel, artifact: artifact)
-            
-    }
-}
+//struct DraftDetailsView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        let viewModel = ArtifactsViewModel()
+//        let artifact = ArtifactsData(
+//            id: UUID(),
+//            title: "Sample Artifact",
+//            description: "This is a sample artifact",
+//            startingPrice: 0.0,
+//            currentBid: 100.0,
+//            isSold: false,
+//            likes: [],
+//            dislikes: [],
+//            currentBidder: "",
+//            rating: 4.0,
+//            isBidded: false,
+//            bidEndDate: Date(),
+//            imageUrls: [],
+//            videoUrl: [],
+//            category: "Sample Category",
+//            timestamp: Date()
+//        )
+//        return DraftDetailsView(viewModel: viewModel, artifact: artifact)
+//            
+//    }
+//}

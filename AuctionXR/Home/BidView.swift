@@ -141,29 +141,30 @@ struct BidView: View {
             }, secondaryButton: .cancel())
         }
     }
-    
-    struct BidView_Previews: PreviewProvider {
-        static var previews: some View {
-            let viewModel = ArtifactsViewModel()
-            BidView(viewModel: viewModel, artifact: ArtifactsData(
-                id: UUID(),
-                title: "Test Artifact",
-                description: "Description",
-                startingPrice: 100,
-                currentBid: 150,
-                isSold: false,
-                likes: [], 
-                dislikes: [],
-                currentBidder: "Current Bidder",
-                rating: 0.0,
-                isBidded: false,
-                bidEndDate: Date(),
-                imageUrls: [],
-                videoUrl: [],
-                category: "Category",
-                timestamp: Date() // Provide a timestamp or mark it as optional
-            ))
-        }
-    }
-    
 }
+    
+//    struct BidView_Previews: PreviewProvider {
+//        static var previews: some View {
+//            let viewModel = ArtifactsViewModel()
+//            BidView(viewModel: viewModel, artifact: ArtifactsData(
+//                id: UUID(),
+//                title: "Test Artifact",
+//                description: "Description",
+//                startingPrice: 100,
+//                currentBid: 150,
+//                isSold: false,
+//                likes: [], 
+//                dislikes: [],
+//                currentBidder: "Current Bidder",
+//                rating: 0.0,
+//                isBidded: false,
+//                bidEndDate: Date(),
+//                imageUrls: [],
+//                videoUrl: [],
+//                category: "Category",
+//                timestamp: Date() // Provide a timestamp or mark it as optional
+//            ))
+//        }
+//    }
+//    
+//}

@@ -25,7 +25,7 @@ struct CreateArtifactView: View {
     let userId: String // 2 years from now
     
     
-    let defaultCurrentBid: Double? = nil
+    let defaultCurrentBid: Double? = 0.0
     let defaultIsSold: Bool = false
     let defaultLikes: [String]? = nil
     let defaultDislikes: [String]? = nil
@@ -47,7 +47,7 @@ struct CreateArtifactView: View {
         ScrollView (showsIndicators: false){
             VStack(alignment: .leading, spacing: 20) {
                 Spacer(minLength: 10)
-                TextField("Title", text: $title)
+                TextField("Name of Artifact", text: $title)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding(.horizontal)
                 
@@ -223,20 +223,33 @@ struct CreateArtifactView: View {
         !title.isEmpty && !description.isEmpty && !startingPrice.isEmpty && selectedCategory != "Select Category" && acceptTerms && (!selectedImages.isEmpty)
     }
     private func saveDraft() {
-        uploadMedia(images: selectedImages, videos: selectedVideoURL != nil ? [selectedVideoURL!] : []) { imageURLs, videoURLs in
+        
+        guard let startingPriceDouble = Double(startingPrice) else {
+                print("Invalid starting price")
+                // Inform the user about the error, e.g., show an alert
+                return
+            }
+
+        uploadMedia(images: selectedImages, videos: selectedVideoURL != nil ? [selectedVideoURL!] : []) { imageURLs, videoURL in
             let draftData: [String: Any] = [
                 "id": UUID().uuidString,
                 "title": self.title,
                 "description": self.description,
-                "startingPrice": self.startingPrice,
+                "startingPrice": startingPriceDouble,
+                "currentBid": defaultCurrentBid as Any,
+                "isSold": defaultIsSold,
+                "likes": defaultLikes as Any,
+                "dislikes": defaultDislikes as Any,
+                "currentBidder": defaultCurrentBidder,
                 "rating": defaultRating,
-                "bidEndDate": Timestamp(date: self.bidEndDate),
+                "isBidded": defaultIsBidded,
+                "bidEndDate": Timestamp(date: Calendar.current.startOfDay(for: self.bidEndDate)),
+
                 "imageUrls": imageURLs,
-                "videoUrls": videoURLs,
+                "videoUrl": videoURL,
                 "category": self.selectedCategory,
                 "userID": self.userId,
-                "timestamp": FieldValue.serverTimestamp()
-            ]
+                "timestamp": FieldValue.serverTimestamp()            ]
             
             let db = Firestore.firestore()
                     db.collection("users").document(self.userId).collection("drafts").addDocument(data: draftData) { error in
@@ -264,13 +277,18 @@ struct CreateArtifactView: View {
             // Inform the user that the form is incomplete
             return
         }
-        
-        uploadMedia(images: selectedImages, videos: selectedVideoURL != nil ? [selectedVideoURL!] : []) { imageURLs, videoURLs in
+        guard let startingPriceDouble = Double(startingPrice) else {
+                print("Invalid starting price")
+                // Inform the user about the error, e.g., show an alert
+                return
+            }
+
+        uploadMedia(images: selectedImages, videos: selectedVideoURL != nil ? [selectedVideoURL!] : []) { imageURLs, videoURL in
             let artifactData: [String: Any] = [
                 "id": UUID().uuidString,
                 "title": self.title,
                 "description": self.description,
-                "startingPrice": self.startingPrice,
+                "startingPrice": startingPriceDouble,
                 "currentBid": defaultCurrentBid as Any,
                 "isSold": defaultIsSold,
                 "likes": defaultLikes as Any,
@@ -278,9 +296,10 @@ struct CreateArtifactView: View {
                 "currentBidder": defaultCurrentBidder,
                 "rating": defaultRating,
                 "isBidded": defaultIsBidded,
-                "bidEndDate": Timestamp(date: self.bidEndDate),
+                "bidEndDate": Timestamp(date: Calendar.current.startOfDay(for: self.bidEndDate)),
+
                 "imageUrls": imageURLs,
-                "videoUrls": videoURLs,
+                "videoUrl": videoURL,
                 "category": self.selectedCategory,
                 "userID": self.userId,
                 "timestamp": FieldValue.serverTimestamp()
@@ -371,6 +390,8 @@ struct CreateArtifactView: View {
         }
     }
 }
+
+
 struct CreateArtifactView_Previews: PreviewProvider {
     static var previews: some View {
         let userAuthManager = UserManager()

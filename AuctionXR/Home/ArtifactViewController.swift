@@ -37,7 +37,7 @@ struct ArtifactViewController: View {
                 // Scroll view to display artifacts based on selected tab
                 ScrollView {
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 20) {
-                        ForEach(artifacts.filter { $0.isBidded == (selectedTab == .bidded) }, id: \.id) { artifact in
+                        ForEach(artifacts.filter { $0.notBidded == (selectedTab == .bidded) }, id: \.id) { artifact in
                             if selectedTab == .bidded {
                                 ArtifactSummaryView(viewModel: viewModel, artifact: artifact)
                                     .padding()

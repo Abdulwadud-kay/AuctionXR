@@ -27,31 +27,48 @@ struct VideoPlayerView: View {
 }
 
 struct MediaCarouselView: View {
-    var images: [UIImage]
+    var images: [URL]
     var videos: [String?] // Change type to String?
     var action: (Int, Bool) -> Void
     @State private var currentIndex: Int = 0
 
     var body: some View {
         GeometryReader { geometry in
-            ZStack(alignment: .bottomTrailing) {
-                TabView(selection: $currentIndex) {
-                    ForEach(0..<images.count, id: \.self) { index in
-                        Image(uiImage: images[index])
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: geometry.size.width)
-                            .tag(index)
-                    }
-                    ForEach(0..<videos.count, id: \.self) { index in
-                        if let videoURLString = videos[index] {
-                            VideoPlayerView(videoURLString: videoURLString) // Pass video URL string
-                                .frame(width: geometry.size.width)
-                                .tag(images.count + index)
+            if !images.isEmpty {
+                ZStack(alignment: .bottomTrailing) {
+                    TabView(selection: $currentIndex) {
+                        ForEach(0..<images.count, id: \.self) { index in
+                            // Load image asynchronously from URL
+                            AsyncImage(url: images[index]) { phase in
+                                switch phase {
+                                    case .success(let image):
+                                        image
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: geometry.size.width)
+                                            .tag(index)
+                                    case .empty:
+                                        Text("Loading...")
+                                    case .failure:
+                                        Text("Failed to load image")
+                                }
+                            }
+                        }
+                        ForEach(0..<videos.count, id: \.self) { index in
+                            if let videoURLString = videos[index] {
+                                VideoPlayerView(videoURLString: videoURLString) // Pass video URL string
+                                    .frame(width: geometry.size.width)
+                                    .tag(images.count + index)
+                            }
                         }
                     }
+                    .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                 }
-                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+                .frame(height: 300)
+            } else {
+                Text("No media available")
+                    .foregroundColor(.secondary)
+                    .padding()
             }
         }
         .frame(height: 300)

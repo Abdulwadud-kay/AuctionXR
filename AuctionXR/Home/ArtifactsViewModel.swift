@@ -5,20 +5,6 @@ import SwiftUI
 class ArtifactsViewModel: ObservableObject {
     @Published var artifacts: [ArtifactsData]? = []
     
-    func fetchArtifacts(userID: String, completion: @escaping (Bool) -> Void) {
-        guard let currentUser = Auth.auth().currentUser else {
-            print("User is not logged in")
-            completion(false)
-            return
-        }
-        
-        print("Fetching artifacts for user: \(userID)")
-        fetchData(from: "posts", userID: userID) { success in
-            print("fetch post completed: \(success)")
-            completion(success)
-        }
-    }
-    
     func fetchDrafts(userID: String, completion: @escaping (Bool) -> Void) {
         guard let currentUser = Auth.auth().currentUser else {
             print("User is not logged in")
@@ -34,19 +20,69 @@ class ArtifactsViewModel: ObservableObject {
     }
     
     func fetchAllArtifacts(completion: @escaping (Bool) -> Void) {
+        // Access Firestore reference
+        let db = Firestore.firestore()
+        
+        // Get the current user's ID
+        guard let currentUserID = Auth.auth().currentUser?.uid else {
+            print("User is not logged in")
+            completion(false)
+            return
+        }
+        
+        // Access the "users" collection and then the specific user's document
+        let userDocRef = db.collection("users").document(currentUserID)
+        
+        // Fetch all documents from the "posts" subcollection of the user's document
+        userDocRef.collection("posts").getDocuments { [weak self] (snapshot, error) in
+            guard let self = self else { return }
+            
+            if let error = error {
+                print("Error fetching artifacts: \(error.localizedDescription)")
+                completion(false)
+                return
+            }
+            
+            // Process fetched documents
+            guard let documents = snapshot?.documents else {
+                print("No artifacts found")
+                completion(false)
+                return
+            }
+            
+            // Map documents to ArtifactsData objects
+            let artifacts = documents.compactMap { document -> ArtifactsData? in
+                do {
+                    return try document.data(as: ArtifactsData.self)
+                } catch {
+                    print("Error decoding document: \(error.localizedDescription)")
+                    return nil
+                }
+            }
+            
+            // Update viewModel's artifacts property
+            self.artifacts = artifacts
+            
+            // Call completion with success
+            completion(true)
+        }
+    }
+
+    
+    func fetchArtifacts(userID: String, completion: @escaping (Bool) -> Void) {
         guard let currentUser = Auth.auth().currentUser else {
             print("User is not logged in")
             completion(false)
             return
         }
         
-        print("Fetching all artifacts")
-        fetchData(from: "posts", userID: "") { success in
-            print("fetchAllArtifacts completed: \(success)")
+        print("Fetching artifacts for user: \(userID)")
+        fetchData(from: "posts", userID: userID) { success in
+            print("fetch post completed: \(success)")
             completion(success)
         }
     }
-    
+
     private func fetchData(from collection: String, userID: String, completion: @escaping (Bool) -> Void) {
         guard let currentUser = Auth.auth().currentUser else {
             print("User is not logged in")
@@ -62,7 +98,8 @@ class ArtifactsViewModel: ObservableObject {
         var query: Query = collectionRef
         
         if !userID.isEmpty {
-            query = collectionRef.whereField("userId", isEqualTo: userID)
+            // Adjust the query to fetch posts belonging to the specified user ID
+            query = collectionRef.whereField("userID", isEqualTo: userID)
         }
         
         query.getDocuments { [weak self] (snapshot, error) in
@@ -86,18 +123,10 @@ class ArtifactsViewModel: ObservableObject {
                 do {
                     var artifact = try document.data(as: ArtifactsData.self)
                     
-                    // Fetch likes and dislikes counts
-                    self.fetchLikesAndDislikes(for: document.reference) { likes, dislikes in
-                        artifact.likes = likes
-                        artifact.dislikes = dislikes
-                        
-                        if let currentBid = artifact.currentBid {
-                            artifact.rating = self.calculateStarRating(from: currentBid)
-                        } else {
-                            // If currentBid is not present, calculate rating from startingPrice
-                            artifact.rating = self.calculateStarRating(from: artifact.startingPrice)
-                        }
-                    }
+                    // Ensure that necessary fields are present and handle missing or null values
+                    artifact.likes = artifact.likes ?? []
+                    artifact.dislikes = artifact.dislikes ?? []
+                    artifact.rating = artifact.rating ?? 0.0
                     
                     return artifact
                 } catch {
@@ -109,6 +138,7 @@ class ArtifactsViewModel: ObservableObject {
             completion(true)
         }
     }
+
 
 
     private func fetchLikesAndDislikes(for reference: DocumentReference, completion: @escaping ([String], [String]) -> Void) {

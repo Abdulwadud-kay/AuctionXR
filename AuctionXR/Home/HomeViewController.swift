@@ -1,5 +1,4 @@
 import SwiftUI
-import FirebaseAuth
 
 struct HomeViewController: View {
     @State private var isShowingProfileView = false
@@ -12,8 +11,9 @@ struct HomeViewController: View {
     let tintColor = Color(hex:"#5729CE")
     
     var body: some View {
-        VStack(spacing: 0) {
-            
+        NavigationView{
+            VStack(spacing: 0) {
+                
                 VStack(spacing: 10) {
                     HStack {
                         // Profile Button
@@ -84,10 +84,13 @@ struct HomeViewController: View {
                     } else {
                         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 20) {
                             ForEach(artifactsViewModel.artifacts ?? [], id: \.id) { artifact in
-                                ArtifactSummaryView(viewModel: artifactsViewModel, artifact: artifact)
+                                NavigationLink(destination: ArtifactDetailView(viewModel: artifactsViewModel, artifact: artifact)) {
+                                    ArtifactSummaryView(viewModel: artifactsViewModel, artifact: artifact)
+                                }
                             }
                         }
                         .padding()
+                        
                     }
                 }
                 .edgesIgnoringSafeArea(.all)
@@ -102,9 +105,15 @@ struct HomeViewController: View {
                 .pickerStyle(SegmentedPickerStyle())
                 .padding()
             }
+            .onAppear {
+                // Fetch artifacts when the view appears
+                artifactsViewModel.fetchAllArtifacts { success in
+                    isLoading = !success // Update isLoading based on fetch success
+                }
+            }
         }
     }
-
+}
 struct HomeViewController_Previews: PreviewProvider {
     static var previews: some View {
         HomeViewController()
