@@ -80,7 +80,7 @@ struct BidView: View {
                             .font(.headline)
                             .padding(.leading, 20)
                         Spacer()
-                        Text("\(artifact.currentBidder)")
+                        Text(verbatim: "\(artifact.currentBidder)")
                             .foregroundColor(.black)
                             .padding(.horizontal, 10)
                     }

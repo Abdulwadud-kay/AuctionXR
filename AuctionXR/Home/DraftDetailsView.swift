@@ -28,7 +28,7 @@ struct DraftDetailsView: View {
         self._editedTitle = State(initialValue: artifact.title)
         self._editedDescription = State(initialValue: artifact.description)
         self._editedStartingPrice = State(initialValue: artifact.startingPrice)
-        self._editedBidEndTime = State(initialValue: artifact.bidEndDate)
+        self._editedBidEndTime = State(initialValue: artifact.bidEndDate ?? Date()) // Provide a default value for editedBidEndTime
         self._selectedCategory = State(initialValue: artifact.category)
     }
     
@@ -202,7 +202,7 @@ struct DraftDetailsView: View {
         editedTitle = artifact.title
         editedDescription = artifact.description
         editedStartingPrice = artifact.startingPrice
-        editedBidEndTime = artifact.bidEndDate
+        editedBidEndTime = artifact.bidEndDate ?? Date()
         selectedCategory = artifact.category
     }
 }

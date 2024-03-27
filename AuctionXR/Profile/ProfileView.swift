@@ -6,6 +6,7 @@ struct ProfileView: View {
     @State private var isEditingProfile = false
     @State private var isLoggingOut = false
     @State private var newUsername: String = ""
+    @State private var selectedImage: UIImage?
     @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
@@ -33,6 +34,18 @@ struct ProfileView: View {
                     },
                     secondaryButton: .cancel()
                 )
+
+            }
+            .sheet(isPresented: $userManager.isImagePickerPresented) {
+                ImagePicker(selectedImage: $selectedImage, sourceType: .photoLibrary) { image in
+                    // Handle the selected image
+                    if let image = image {
+                        // Update the user manager with the selected image
+                        userManager.userImage = image
+                    }
+                    // Dismiss the image picker
+                    userManager.isImagePickerPresented = false
+                }
             }
         }
     }
@@ -115,11 +128,13 @@ struct ProfileView: View {
         Button(isEditingProfile ? "Save" : "Edit") {
             if isEditingProfile {
                 userManager.updateUsername(newUsername)
+
                 userManager.saveProfileChanges()
             }
             isEditingProfile.toggle()
         }
     }
+
     
     private func logoutUser() {
         do {

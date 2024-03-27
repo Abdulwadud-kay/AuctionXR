@@ -47,16 +47,18 @@ class UserManager: ObservableObject {
                 }
                 return
             }
-            if let username = document.get("username") as? String {
+            if let username = document.get("username") as? String,
+               let profileImageURL = document.get("profileImageURL") as? String { // Fetch profile image URL
                 DispatchQueue.main.async {
-                    self.handleUserFound(userId: user.uid, email: user.email ?? "", username: username)
+                    self.handleUserFound(userId: user.uid, email: user.email ?? "", username: username, profileImageURL: profileImageURL)
                 }
             } else {
-                print("Username not found in user details")
-                // Handle missing username gracefully
+                print("Username or profile image URL not found in user details")
+                // Handle missing username or profile image URL gracefully
             }
         }
     }
+
 
     private func handleUserNotFound(userId: String, email: String) {
         self.userId = userId
@@ -67,19 +69,20 @@ class UserManager: ObservableObject {
         self.appState = .loggedIn
     }
 
-    private func handleUserFound(userId: String, email: String, username: String) {
+    private func handleUserFound(userId: String, email: String, username: String, profileImageURL: String) {
         self.userId = userId
         self.userEmail = email
         self.username = username
-        self.userImage = nil
+        self.userImageURL = profileImageURL // Store the profile image URL
         self.isLoggedIn = true
         self.appState = .loggedIn
     }
 
+
     func updateUsername(_ newUsername: String) {
         self.username = newUsername
     }
-
+    
     func uploadProfileImage(_ image: UIImage, completion: @escaping (Result<String, Error>) -> Void) {
         guard let imageData = image.jpegData(compressionQuality: 0.5) else {
             completion(.failure(YourError.imageConversionFailed))

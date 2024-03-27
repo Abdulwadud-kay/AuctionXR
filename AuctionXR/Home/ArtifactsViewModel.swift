@@ -1,9 +1,11 @@
 import FirebaseAuth
 import FirebaseFirestore
 import SwiftUI
+import Combine
 
 class ArtifactsViewModel: ObservableObject {
     @Published var artifacts: [ArtifactsData]? = []
+    @Published var selectedSegment: Int = 0
     
     func fetchDrafts(userID: String, completion: @escaping (Bool) -> Void) {
         guard let currentUser = Auth.auth().currentUser else {
@@ -11,7 +13,7 @@ class ArtifactsViewModel: ObservableObject {
             completion(false)
             return
         }
-        
+      
         print("Fetching drafts for user: \(userID)")
         fetchData(from: "drafts", userID: userID) { success in
             print("fetch Drafts completed: \(success)")
@@ -139,6 +141,23 @@ class ArtifactsViewModel: ObservableObject {
         }
     }
 
+    func removeArtifactFromDrafts(artifactID: String) {
+        guard let currentUser = Auth.auth().currentUser else {
+            print("User is not logged in")
+            return
+        }
+        
+        let db = Firestore.firestore()
+        let draftRef = db.collection("drafts").document(artifactID)
+        
+        draftRef.delete { error in
+            if let error = error {
+                print("Error deleting artifact from drafts: \(error.localizedDescription)")
+            } else {
+                print("Artifact successfully removed from drafts")
+            }
+        }
+    }
 
 
     private func fetchLikesAndDislikes(for reference: DocumentReference, completion: @escaping ([String], [String]) -> Void) {

@@ -22,12 +22,14 @@ struct ArtifactDraftView: View {
     @State private var currentImageIndex = 0
     @State private var isDetailActive = false
     @State private var imageData: Data?
+    @State private var isDeleteConfirmationShown = false
+    
     let timer = Timer.publish(every: 900, on: .main, in: .common).autoconnect() // 900 seconds = 15 minutes
     
     var body: some View {
-        NavigationView{
+        NavigationView {
             VStack {
-                NavigationLink(destination: ArtifactDetailView(viewModel: viewModel, artifact: artifact), isActive: $isDetailActive) {
+                NavigationLink(destination: DraftDetailsView(viewModel: viewModel, artifact: artifact), isActive: $isDetailActive) {
                     EmptyView()
                 }
                 .hidden()
@@ -87,50 +89,86 @@ struct ArtifactDraftView: View {
                     .cornerRadius(10)
                     .frame(width: UIScreen.main.bounds.width / 2 - 20)
             }
-            
-        }
-    }
-            private func loadImage(from url: URL) {
-                URLSession.shared.dataTask(with: url) { data, _, error in
-                    if let data = data {
-                        DispatchQueue.main.async {
-                            self.imageData = data
+            .gesture(LongPressGesture(minimumDuration: 1.0)
+                        .onEnded { _ in
+                            // Show delete confirmation
+                            self.isDeleteConfirmationShown.toggle()
+                        }
+            )
+            .overlay(
+                VStack {
+                    Spacer()
+                    if isDeleteConfirmationShown {
+                        HStack {
+                            Spacer()
+                            Button(action: {
+                                // Remove the artifact from the draft collection
+                                self.viewModel.removeArtifactFromDrafts(artifactID: artifact.id.uuidString)
+
+                                // Dismiss the confirmation
+                                self.isDeleteConfirmationShown.toggle()
+                            }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(.black)
+                                    .padding()
+                            }
                         }
                     }
-                }.resume()
-            }
+                }
+            )
         }
+    }
+    
+    private func loadImage(from url: URL) {
+        URLSession.shared.dataTask(with: url) { data, _, error in
+            if let data = data {
+                DispatchQueue.main.async {
+                    self.imageData = data
+                }
+            }
+        }.resume()
+    }
+}
+
 
     
-    // Preview
-    //struct ArtifactDraftView_Previews: PreviewProvider {
-    //    static var previews: some View {
-    //        let viewModel = ArtifactsViewModel()
-    //        let imageUrl = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAAAAAA..."
-    //        let videoUrl = "https://www.example.com/sample-video.mp4"
-    //        let artifact = ArtifactsData(
-    //            id: UUID(),
-    //            title: "Sample Artifact",
-    //            description: "This is a sample artifact",
-    //            startingPrice: 0.0,
-    //            currentBid: 100.0,
-    //            isSold: false,
-    //            likes: [],
-    //            dislikes: [],
-    //            currentBidder: "",
-    //            rating: 0.0,
-    //            isBidded: false,
-    //            bidEndDate: Date(),
-    //            imageUrls: [imageUrl],
-    //            videoUrl: [videoUrl],
-    //            category: "Sample Category",
-    //            timestamp: Date()
-    //        )
-    //
-    //        return NavigationView {
-    //            ArtifactDraftView(viewModel: viewModel, artifact: artifact)
-    //                .environmentObject(viewModel)
-    //        }
-    //    }
-    //}
-
+struct ArtifactDraftView_Previews: PreviewProvider {
+    static var previews: some View {
+        let viewModel = ArtifactsViewModel()
+        let imageUrl = "ArtifactImage.jpg"
+        let videoUrl = "https://www.example.com/sample-video.mp4"
+        
+        // Convert UUID to String
+        let artifactID = UUID().uuidString
+        
+        // Create a dictionary representing the data that would be fetched from Firestore
+        let data: [String: Any] = [
+            "title": "Sample Artifact",
+            "description": "This is a sample artifact",
+            "startingPrice": 0.0,
+            "currentBid": 100.0,
+            "isSold": false,
+            "likes": [],
+            "dislikes": [],
+            "currentBidder": "",
+            "rating": 0.0,
+            "isBidded": false,
+            "bidEndDate": Date(),
+            "imageUrls": [imageUrl],
+            "videoUrl": [videoUrl],
+            "category": "Sample Category",
+            "timestamp": Date(),
+            "userID": "sampleUserID"
+        ]
+        
+        // Initialize ArtifactsData using the provided data dictionary
+        guard let artifact = ArtifactsData(id: artifactID, data: data) else {
+            fatalError("Failed to initialize ArtifactsData")
+        }
+        
+        return NavigationView {
+            ArtifactDraftView(viewModel: viewModel, artifact: artifact)
+                .environmentObject(viewModel)
+        }
+    }
+}

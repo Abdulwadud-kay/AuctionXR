@@ -1,42 +1,73 @@
-//
-//  HistoryView.swift
-//  GoTwice
-//
-//  Created by Abdulwadud Abdulkadir on 1/11/24.
-//
-
-import Foundation
 import SwiftUI
-
+import Firebase
 
 struct HistoryView: View {
-@EnvironmentObject var userAuthManager: UserManager
-    // Expanded data model to include an 'isSold' flag
-    let items = [
-        Item(title: "Vintage Clock", price: 150.00, buyer: "Alice", isSold: true),
-        Item(title: "Antique Painting", price: 300.00, buyer: "Bob", isSold: false)
-    ]
+    @EnvironmentObject var userAuthManager: UserManager
+    @State private var soldArtifacts: [ArtifactsData] = []
 
     var body: some View {
-        List(items, id: \.title) { item in
+        List(soldArtifacts, id: \.id) { artifact in
             VStack(alignment: .leading) {
-                Text(item.title)
+                Text(artifact.title)
                     .font(.headline)
-                Text("\(item.isSold ? "Sold" : "Bought") for $\(item.price, specifier: "%.2f")")
-                    .font(.subheadline)
-                Text(item.isSold ? "Buyer: \(item.buyer)" : "Seller: \(item.buyer)")
-                    .font(.subheadline)
+                if let currentBid = artifact.currentBid {
+                    Text("Sold for $\(currentBid, specifier: "%.2f")")
+                        .font(.subheadline)
+                } else {
+                    Text("Sold for Unknown Price")
+                        .font(.subheadline)
+                }
+                if let bidEndDate = artifact.bidEndDate {
+                    Text("\(formatDate(bidEndDate))")
+                        .font(.subheadline)
+                } else {
+                    Text("Bid End Date Unknown")
+                        .font(.subheadline)
+                }
             }
         }
         .navigationBarTitle("Transactions")
+        .onAppear {
+            fetchSoldArtifacts()
+        }
     }
-}
 
-struct Item {
-    let title: String
-    let price: Double
-    let buyer: String // Could be 'seller' or 'buyer' based on the context
-    let isSold: Bool  // True if sold, false if bought
+    private func fetchSoldArtifacts() {
+        let db = Firestore.firestore()
+        let userId = Auth.auth().currentUser?.uid ?? ""
+        
+        db.collection("artifacts")
+            .whereField("userId", isEqualTo: userId)
+            .whereField("isSold", isEqualTo: true)
+            .getDocuments { querySnapshot, error in
+                if let error = error {
+                    print("Error fetching sold artifacts: \(error.localizedDescription)")
+                    return
+                }
+                
+                guard let documents = querySnapshot?.documents else {
+                    print("No documents found")
+                    return
+                }
+                
+                self.soldArtifacts = documents.compactMap { document in
+                    do {
+                        let artifact = try document.data(as: ArtifactsData.self)
+                        return artifact
+                    } catch {
+                        print("Error decoding artifact: \(error.localizedDescription)")
+                        return nil
+                    }
+                }
+            }
+    }
+
+    func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM dd, yyyy"
+        return formatter.string(from: date)
+    }
+
 }
 
 struct HistoryView_Previews: PreviewProvider {
@@ -44,4 +75,3 @@ struct HistoryView_Previews: PreviewProvider {
         HistoryView()
     }
 }
-

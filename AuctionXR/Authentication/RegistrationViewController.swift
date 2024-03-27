@@ -59,23 +59,23 @@ struct RegisterViewController: View {
                 Button("Register") {
                     registerUser()
                 }
-                .padding(.all,15)
+                .padding(.all,11)
                 .background(buttonColor)
                 .foregroundColor(.white)
-                .cornerRadius(30)
-                .padding(.horizontal)
+                .cornerRadius(16)
+      
                 
                 
                 
-                Spacer()
-                    .frame(height: 150)
+//                Spacer()
+//                    .frame(height: 10)
                 // Navigation to Login on Successful Registration
-                Button("Already have an account? Login") {
-                    showLogin()
-                }
-                .foregroundColor(buttonColor)
-                .underline()
-                .padding()
+//                Button("Already have an account? Login") {
+//                    showLogin()
+//                }
+//                .foregroundColor(buttonColor)
+//                .underline()
+//                .padding()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(backgroundColor)

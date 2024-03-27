@@ -22,7 +22,7 @@ struct ArtifactDetailView: View {
 
                 
 
-                CountdownTimerView(endTime: artifact.bidEndDate)
+                CountdownTimerView(endTime: artifact.bidEndDate ?? Date())
                     .padding(.vertical)
                 
                 HStack {

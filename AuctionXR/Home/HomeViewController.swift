@@ -7,9 +7,10 @@ struct HomeViewController: View {
     @ObservedObject var artifactsViewModel = ArtifactsViewModel()
     @State private var isLoading = true // Added isLoading state
     @State private var selectedCategory: String = "All" // Added selectedCategory state
-    
+    @State private var showNoArtifactsText = false // Added state to control displaying "No artifacts available" text
+
     let tintColor = Color(hex:"#5729CE")
-    
+
     var body: some View {
         NavigationView{
             VStack(spacing: 0) {
@@ -25,13 +26,17 @@ struct HomeViewController: View {
                                 if let image = userAuthManager.userImage {
                                     Image(uiImage: image)
                                         .resizable()
-                                        .scaledToFit()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(width: 30, height: 30)
                                         .clipShape(Circle())
                                 } else {
                                     Image(systemName: "person.crop.circle")
                                         .resizable()
+                                        .aspectRatio(contentMode: .fit)
                                         .frame(width: 30, height: 30)
+                                        .clipShape(Circle())
                                 }
+
                             }
                             .foregroundColor(Color(hex:"#5729CE"))
                         }
@@ -81,16 +86,31 @@ struct HomeViewController: View {
                             .progressViewStyle(CircularProgressViewStyle(tint: tintColor))
                             .padding(.top, 300)
                             .padding(.bottom, 400)
-                    } else {
-                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 20) {
-                            ForEach(artifactsViewModel.artifacts ?? [], id: \.id) { artifact in
-                                NavigationLink(destination: ArtifactDetailView(viewModel: artifactsViewModel, artifact: artifact)) {
-                                    ArtifactSummaryView(viewModel: artifactsViewModel, artifact: artifact)
+                            .onAppear {
+                                // Start a timer to check if no artifacts are available after 10 seconds
+                                Timer.scheduledTimer(withTimeInterval: 10, repeats: false) { _ in
+                                    if artifactsViewModel.artifacts?.isEmpty ?? true {
+                                        // Show the "No artifacts available" text if no artifacts are loaded after 10 seconds
+                                        showNoArtifactsText = true
+                                    }
                                 }
                             }
+                    } else {
+                        if showNoArtifactsText {
+                            Text("No artifacts available")
+                                .foregroundColor(.black)
+                                .font(.headline)
+                                .padding()
+                        } else {
+                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 20) {
+                                ForEach(artifactsViewModel.artifacts ?? [], id: \.id) { artifact in
+                                    NavigationLink(destination: ArtifactDetailView(viewModel: artifactsViewModel, artifact: artifact)) {
+                                        ArtifactSummaryView(viewModel: artifactsViewModel, artifact: artifact)
+                                    }
+                                }
+                            }
+                            .padding()
                         }
-                        .padding()
-                        
                     }
                 }
                 .edgesIgnoringSafeArea(.all)
@@ -114,6 +134,7 @@ struct HomeViewController: View {
         }
     }
 }
+
 struct HomeViewController_Previews: PreviewProvider {
     static var previews: some View {
         HomeViewController()

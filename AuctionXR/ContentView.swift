@@ -11,12 +11,14 @@ struct ContentView: View {
     @EnvironmentObject var userAuthManager: UserManager
 
     var body: some View {
+        
         switch userAuthManager.appState {
         case .initial, .loggedOut:
             AuthenticationView().environmentObject(userAuthManager)
         case .loggedIn:
             MainTabView().environmentObject(userAuthManager)
         }
+        
     }
 }
 

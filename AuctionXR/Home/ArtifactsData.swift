@@ -10,16 +10,16 @@ struct ArtifactsData: Identifiable, Codable {
     var isSold: Bool
     var likes: [String]?
     var dislikes: [String]?
-    var currentBidder: String
+    var currentBidder: String?
     var rating: Double
     var isBidded: Bool
-    var bidEndDate: Date
+    var bidEndDate: Date?
     var imageUrls: [String]?
     var videoUrl: [String]?
     var category: String
     var timestamp: Date?
     var userID: String
-   
+       
 
     // Additional initializer for mapping Firestore data
     init?(id: String, data: [String: Any]) {
