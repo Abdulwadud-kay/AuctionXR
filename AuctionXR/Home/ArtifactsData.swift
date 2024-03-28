@@ -8,8 +8,6 @@ struct ArtifactsData: Identifiable, Codable {
     var startingPrice: Double
     var currentBid: Double?
     var isSold: Bool
-    var likes: [String]?
-    var dislikes: [String]?
     var currentBidder: String?
     var rating: Double
     var isBidded: Bool
@@ -39,8 +37,6 @@ struct ArtifactsData: Identifiable, Codable {
         
         // Optional properties
         let currentBid = data["currentBid"] as? Double
-        let likes = data["likes"] as? [String]
-        let dislikes = data["dislikes"] as? [String]
         let videoUrl = data["videoUrl"] as? [String]
         let timestamp = (data["timestamp"] as? Timestamp)?.dateValue()
         let bidEndDate = bidEndDateTimestamp.dateValue()
@@ -51,8 +47,6 @@ struct ArtifactsData: Identifiable, Codable {
                 self.startingPrice = startingPrice
                 self.currentBid = currentBid
                 self.isSold = isSold
-                self.likes = likes
-                self.dislikes = dislikes
                 self.currentBidder = currentBidder
                 self.rating = rating
                 self.isBidded = isBidded

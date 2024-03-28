@@ -1,4 +1,7 @@
 import SwiftUI
+import FirebaseFirestore
+import FirebaseAuth
+
 
 struct AccountDetailsView: View {
     @EnvironmentObject var userAuthManager: UserManager
@@ -103,8 +106,7 @@ struct AccountDetailsView: View {
                     
                     Button(action: {
                         // Perform save action
-                        self.userAuthManager.setAccountSetup(true)
-                        self.presentationMode.wrappedValue.dismiss()
+                        saveAccountDetails()
                     }) {
                         Text("Save")
                             .padding(10)
@@ -126,7 +128,38 @@ struct AccountDetailsView: View {
             }
         }
     }
+
+func saveAccountDetails() {
+        guard let currentUser = Auth.auth().currentUser else {
+            return
+        }
+        
+        let db = Firestore.firestore()
+        let userDetails = [
+            "cardNumber": cardNumber,
+            "expiryDate": expiryDate,
+            "cvv": cvv,
+            "fullName": fullName,
+            "zipCode": zipCode,
+            "state": state,
+            "city": city,
+            "streetAddress": streetAddress,
+            "email": email,
+            "phoneNumber": phoneNumber
+        ]
+        
+        db.collection("users").document(currentUser.uid).setData(userDetails) { error in
+            if let error = error {
+                print("Error saving account details: \(error.localizedDescription)")
+            } else {
+                // Account details saved successfully
+                self.userAuthManager.setAccountSetup(true)
+                self.presentationMode.wrappedValue.dismiss()
+            }
+        }
+    }
 }
+
 
 struct AccountDetailsView_Previews: PreviewProvider {
     static var previews: some View {

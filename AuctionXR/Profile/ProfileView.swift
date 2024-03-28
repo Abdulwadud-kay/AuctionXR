@@ -8,7 +8,7 @@ struct ProfileView: View {
     @State private var newUsername: String = ""
     @State private var selectedImage: UIImage?
     @Environment(\.presentationMode) var presentationMode
-
+    
     var body: some View {
         NavigationView {
             List {
@@ -20,7 +20,6 @@ struct ProfileView: View {
                     }.padding()
                 }.listRowBackground(Color(.white))
                 generalSection
-                informationSection
             }
             .listStyle(InsetGroupedListStyle())
             .navigationBarTitle("Profile", displayMode: .inline)
@@ -34,7 +33,7 @@ struct ProfileView: View {
                     },
                     secondaryButton: .cancel()
                 )
-
+                
             }
             .sheet(isPresented: $userManager.isImagePickerPresented) {
                 ImagePicker(selectedImage: $selectedImage, sourceType: .photoLibrary) { image in
@@ -112,23 +111,12 @@ struct ProfileView: View {
             .foregroundColor(.red)
         }
     }
-    
-    private var informationSection: some View {
-        Section(header: Text("Information")) {
-            NavigationLink(destination: FAQsView()) {
-                Label("FAQs", systemImage: "text.book.closed")
-            }
-            NavigationLink(destination: AboutUsView()) {
-                Label("About Us", systemImage: "info.circle")
-            }
-        }
-    }
-    
+
     private var editButton: some View {
         Button(isEditingProfile ? "Save" : "Edit") {
             if isEditingProfile {
                 userManager.updateUsername(newUsername)
-
+                
                 userManager.saveProfileChanges()
             }
             isEditingProfile.toggle()
@@ -147,6 +135,11 @@ struct ProfileView: View {
         }
     }
 }
+//    private func updateUserImage(_ image: UIImage?) {
+//            userManager.userImage = image
+//            userManager.profileImageChanged.send() // Notify profile image change
+//        }
+
 
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {

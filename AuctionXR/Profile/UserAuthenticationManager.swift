@@ -3,6 +3,7 @@ import FirebaseAuth
 import FirebaseFirestore
 import FirebaseStorage
 import SwiftUI
+import Combine
 
 class UserManager: ObservableObject {
     @Published var appState: AppState = .initial
@@ -14,6 +15,8 @@ class UserManager: ObservableObject {
     @Published var userId: String = ""
     @Published var isImagePickerPresented: Bool = false
     @Published var isAccountSetup = false
+    var profileImageChanged = PassthroughSubject<Void, Never>()
+    var loggedInStateChanged = PassthroughSubject<Bool, Never>()
 
     var userInitial: String {
         username.isEmpty ? "" : String(username.prefix(1)).uppercased()

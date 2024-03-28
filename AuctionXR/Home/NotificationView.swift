@@ -1,52 +1,59 @@
 import SwiftUI
 
 struct NotificationView: View {
-    // This variable would eventually be connected to your notification logic
-    @State private var notifications: [String] = [
-        "A five-star artifact is on the market",
-        "John Pierre has just bidded on Ancient vase",
-        "You have a new message from Alice",
-        "Your auction for Rare Coin ends in 1 hour",
-        "Congratulations! Your artifact has been sold"
+    let notifications = [
+        NotificationModel(profileImage: "person.crop.circle", message: "John Doe liked your post.", time: "1h"),
+        NotificationModel(profileImage: "person.crop.circle", message: "Jane Smith commented on your photo.", time: "1d"),
+        NotificationModel(profileImage: "person.crop.circle", message: "Mike Johnson shared your post.", time: "1s"),
+        NotificationModel(profileImage: "person.crop.circle", message: "Emily Davis started following you.", time: "1yr"),
+        NotificationModel(profileImage: "person.crop.circle", message: "Chris Brown mentioned you in a comment.", time: "1m"),
+        NotificationModel(profileImage: "person.crop.circle", message: "Alex Wilson sent you a message.", time: "1h"),
+        NotificationModel(profileImage: "person.crop.circle", message: "Samantha Miller tagged you in a post.", time: "1d"),
+        NotificationModel(profileImage: "person.crop.circle", message: "George King liked your comment.", time: "1s"),
+        NotificationModel(profileImage: "person.crop.circle", message: "Lucy Graham shared your story.", time: "1yr"),
+        NotificationModel(profileImage: "person.crop.circle", message: "Oliver Scott invited you to an event.", time: "1m")
     ]
     
     var body: some View {
-        
-        NavigationView {
-            ScrollView{
+        List(notifications) { notification in
+            HStack {
+                Image(systemName: notification.profileImage)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 40, height: 40)
+                    .clipShape(Circle())
                 
-                VStack {
-                    if notifications.isEmpty {
-                        Text("No Notifications")
-                            .foregroundColor(.gray)
-                            .italic()
-                    } else {
-                        // This would be your list of notifications
-                        ForEach(notifications, id: \.self) { notification in
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(Color.white)
-                                .frame(height: 50) // Adjust the height here
-                                .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 2)
-                                .overlay(
-                                    Text(notification)
-                                        .foregroundColor(.black)
-                                        .padding()
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                )
-                                .padding(.horizontal)
-                                .padding(.vertical, 5)
-                                
-                                
-                            
-                        }
-                    }
+                Text(notification.message)
+                
+                Spacer()
+                
+                Text(notification.time)
+                    .foregroundColor(.gray)
+                
+                Button(action: {
+                    // Action for ellipsis button
+                }) {
+                    Image(systemName: "ellipsis")
+                        .foregroundColor(.gray)
                 }
-                .navigationBarTitle("Notifications", displayMode: .inline)
+            }
+            .padding(.vertical)
+        
+    
+
+           .navigationBarTitle("Notifications", displayMode: .inline)
                 .padding(.bottom, 300)
             }
-        }
     }
 }
+
+struct NotificationModel: Identifiable {
+    let id = UUID()
+    let profileImage: String
+    let message: String
+    let time: String
+}
+
 
 struct NotificationsView_Previews: PreviewProvider {
     static var previews: some View {

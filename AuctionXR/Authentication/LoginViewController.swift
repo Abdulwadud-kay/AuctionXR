@@ -9,7 +9,10 @@ struct LoginViewController: View {
     @State private var password: String = ""
     @State private var showError = false
     @State private var errorMessage = ""
+    @State private var isPasswordVisible = false
     @EnvironmentObject var userAuthManager: UserManager
+    @State private var isRegistering = false
+
     
     let backgroundColor = Color(.white)
     let buttonColor = Color(hex: "#ff5f00")
@@ -18,29 +21,40 @@ struct LoginViewController: View {
     var body: some View {
             NavigationStack {
                 VStack(spacing: 15) {
+                    Image("auctionbox")
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(maxWidth: 260, minHeight: 50)
+
                     HStack {
-                        Image(systemName: "envelope")
-                            .foregroundColor(Color(otherColor))
-                            .padding(.leading, 3)
                         TextField("Email", text: $email)
                             .autocapitalization(.none)
                             .keyboardType(.emailAddress)
+                            .padding()
+                            .background(Color(.systemGray6))
+                            .cornerRadius(15)
                             .padding(.horizontal)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .padding(.bottom, 8)
-                            .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 2) // Apply shadow
+
                     }
                     
                     HStack {
-                        Image(systemName: "lock")
-                            .foregroundColor(Color(otherColor))
-                            .padding(.leading, 8)
-                        SecureField("Password", text: $password)
-                            .padding(.horizontal)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .padding(.bottom, 8)
-                            .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 2) // Apply shadow
-                    }
+                        if isPasswordVisible {
+                            TextField("Password", text: $password)
+                            } else {
+                            SecureField("Password", text: $password)
+                                    }
+                            Button(action: {
+                                self.isPasswordVisible.toggle()
+                            }) {
+                            Image(systemName: self.isPasswordVisible ? "eye.fill" : "eye.slash.fill")
+                                .foregroundColor(.gray)
+                                }
+                                }
+                                .padding()
+                                .background(Color(.systemGray6))
+                                .cornerRadius(15)
+                                .padding(.horizontal)
+
                     
                     if showError {
                         Text(errorMessage)
@@ -48,15 +62,25 @@ struct LoginViewController: View {
                             .padding()
                     }
                     
+                    Button(action: {
+                                    isRegistering = true
+                        }) {
+                        Text("Forgot password?")
+                            .foregroundColor(.gray)
+                            .padding(.top, 5)
+                                }
+
+                    
                     Button("Login") {
                         loginUser()
                     }
-                    .padding(8)
-                    .background(buttonColor)
+                    .fontWeight(.bold)
                     .foregroundColor(.white)
-                    .cornerRadius(8)
-                    .padding(.horizontal)
-                    .padding(.bottom,100)
+                    .frame(maxWidth: 365, minHeight: 50)
+                    .background(otherColor)
+                    .cornerRadius(15)
+                    .padding(.top, 10)
+
                     
                     Spacer()
                         .frame(height: 10)

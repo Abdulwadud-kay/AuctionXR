@@ -20,8 +20,6 @@ struct ArtifactDetailView: View {
                         .padding()
                 }
 
-                
-
                 CountdownTimerView(endTime: artifact.bidEndDate ?? Date())
                     .padding(.vertical)
                 
@@ -43,30 +41,17 @@ struct ArtifactDetailView: View {
                     .font(.subheadline)
                     .lineLimit(nil)
                 
-                // Like, dislike, watchlist buttons
-                HStack(spacing: 10) {
-                    // Like button
-                    likeDislikeButton(imageName: "hand.thumbsup", count: artifact.likes?.count) {
-                        viewModel.updateLike(for: artifact.id.uuidString, userID: "user123")
+                Spacer()
+                
+                // Watchlist button
+                Button(action: { isWatchlisted.toggle() }) {
+                    HStack {
+                        Image(systemName: isWatchlisted ? "eye.fill" : "eye")
+                        Text(isWatchlisted ? "Watchlisted" : "Watchlist")
                     }
-                    
-                    // Dislike button
-                    likeDislikeButton(imageName: "hand.thumbsdown", count: artifact.dislikes?.count) {
-                        viewModel.updateDislike(for: artifact.id.uuidString, userID: "user124")
-                    }
-                    
-                    Spacer()
-                    
-                    // Watchlist button
-                    Button(action: { isWatchlisted.toggle() }) {
-                        HStack {
-                            Image(systemName: isWatchlisted ? "eye.fill" : "eye")
-                            Text(isWatchlisted ? "Watchlisted" : "Watchlist")
-                        }
-                    }
-                    .foregroundColor(isWatchlisted ? Color.blue : Color.primary)
                 }
-                .padding(.vertical)
+                .foregroundColor(isWatchlisted ? Color.blue : Color.primary)
+                .padding(.bottom)
                 
                 // Rating stars
                 HStack {
@@ -85,17 +70,6 @@ struct ArtifactDetailView: View {
         .navigationBarTitle(Text(artifact.title), displayMode: .inline)
     }
     
-    private func likeDislikeButton(imageName: String, count: Int?, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            HStack {
-                Image(systemName: imageName)
-                if let count = count {
-                    Text("\(count)")
-                }
-            }
-        }
-    }
-    
     private func ratingStars(rating: Double) -> some View {
         HStack {
             ForEach(0..<5, id: \.self) { index in
@@ -107,32 +81,3 @@ struct ArtifactDetailView: View {
     }
 }
 
-//struct ArtifactDetailView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        let viewModel = ArtifactsViewModel()
-//        let imageUrl = "sample_image_url"
-//        let videoUrl = "sample_video_url"
-//        let artifact = ArtifactsData(
-//            id: UUID(),
-//            title: "Sample Artifact",
-//            description: "This is a sample artifact",
-//            startingPrice: 0.0,
-//            currentBid: 100.0,
-//            isSold: false,
-//            likes: [],
-//            dislikes: [],
-//            currentBidder: "",
-//            rating: 4.0,
-//            isBidded: false,
-//            bidEndDate: Date(),
-//            imageUrls: [imageUrl],
-//            videoUrl: [videoUrl],
-//            category: "Sample Category",
-//            timestamp: Date()
-//        )
-//        return NavigationView {
-//            ArtifactDetailView(viewModel: viewModel, artifact: artifact)
-//                .environmentObject(viewModel)
-//        }
-//    }
-//}

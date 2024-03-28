@@ -178,18 +178,16 @@ struct DraftDetailsView: View {
             "title": editedTitle,
             "description": editedDescription,
             "startingPrice": editedStartingPrice,
-            "currentBid": artifact.currentBid ?? 0.0, // Provide a default value
+            "currentBid": artifact.currentBid ?? 0.0,
             "isSold": artifact.isSold,
-            "likes": artifact.likes ?? [], // Provide a default value
-            "dislikes": artifact.dislikes ?? [], // Provide a default value
             "currentBidder": artifact.currentBidder,
             "rating": artifact.rating,
             "isBidded": artifact.isBidded,
             "bidEndDate": editedBidEndTime,
             "imageUrls": artifact.imageUrls,
-            "videoUrl": artifact.videoUrl ?? [], // Provide a default value
+            "videoUrl": artifact.videoUrl ?? [],
             "category": selectedCategory,
-            "timestamp": artifact.timestamp ?? Date(), // Provide a default value
+            "timestamp": artifact.timestamp ?? Date(), 
             "userID": artifact.userID
         ])
         if let updatedArtifact = updatedArtifact {
@@ -219,28 +217,3 @@ struct SecondaryButtonStyle: ButtonStyle {
 }
 
 
-//struct DraftDetailsView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        let viewModel = ArtifactsViewModel()
-//        let artifact = ArtifactsData(
-//            id: UUID(),
-//            title: "Sample Artifact",
-//            description: "This is a sample artifact",
-//            startingPrice: 0.0,
-//            currentBid: 100.0,
-//            isSold: false,
-//            likes: [],
-//            dislikes: [],
-//            currentBidder: "",
-//            rating: 4.0,
-//            isBidded: false,
-//            bidEndDate: Date(),
-//            imageUrls: [],
-//            videoUrl: [],
-//            category: "Sample Category",
-//            timestamp: Date()
-//        )
-//        return DraftDetailsView(viewModel: viewModel, artifact: artifact)
-//            
-//    }
-//}

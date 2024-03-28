@@ -11,6 +11,8 @@ struct RegisterViewController: View {
     @State private var password: String = ""
     @State private var showError = false
     @State private var errorMessage = ""
+    @State private var isPasswordVisible = false
+
     @EnvironmentObject var userAuthManager: UserManager
     
     let backgroundColor = Color(.white)
@@ -19,36 +21,52 @@ struct RegisterViewController: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 15) {
-                HStack {
-                    Image(systemName: "person")
-                        .foregroundColor(Color(buttonColor))
-                        .padding(.leading, 8)
-                    TextField("Username", text: $username)
-                        .autocapitalization(.none)
-                }
-                .padding(.horizontal)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+                Image("auctionbox")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(maxWidth: 260, minHeight: 50)
+
                 
-                HStack {
-                    Image(systemName: "envelope")
-                        .foregroundColor(Color(buttonColor))
-                        .padding(.leading, 3)
-                    TextField("Email", text: $email)
-                        .autocapitalization(.none)
-                        .keyboardType(.emailAddress)
-                }
+                TextField("Username", text: $username)
+                .autocapitalization(.none)
                 .padding(.horizontal)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(15)
+                .padding(.horizontal)
+
                 
+
+                TextField("Email", text: $email)
+                .autocapitalization(.none)
+                .keyboardType(.emailAddress)
+                .padding(.horizontal)
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(15)
+                .padding(.horizontal)
+
+                
+
                 HStack {
-                    Image(systemName: "lock")
-                        .foregroundColor(Color(buttonColor))
-                        .padding(.leading, 8)
+                    if isPasswordVisible {
+                    TextField("Password", text: $password)
+                    } else {
                     SecureField("Password", text: $password)
-                }
-                .padding(.horizontal)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding(.bottom, 8)
+                        }
+                    Button(action: {
+                        self.isPasswordVisible.toggle()
+                    }) {
+                    Image(systemName: self.isPasswordVisible ? "eye.fill" : "eye.slash.fill")
+                                        .foregroundColor(.gray)
+                                }
+                            }
+                            .padding()
+                            .background(Color(.systemGray6))
+                            .cornerRadius(15)
+                            .padding(.horizontal)
+                            .padding(.top, 10)
+
                 
                 if showError {
                     Text(errorMessage)
@@ -59,23 +77,12 @@ struct RegisterViewController: View {
                 Button("Register") {
                     registerUser()
                 }
-                .padding(.all,11)
-                .background(buttonColor)
+                .fontWeight(.bold)
                 .foregroundColor(.white)
-                .cornerRadius(16)
-      
-                
-                
-                
-//                Spacer()
-//                    .frame(height: 10)
-                // Navigation to Login on Successful Registration
-//                Button("Already have an account? Login") {
-//                    showLogin()
-//                }
-//                .foregroundColor(buttonColor)
-//                .underline()
-//                .padding()
+                .frame(maxWidth: 360, minHeight: 50)
+                .background(buttonColor)
+                .cornerRadius(15)
+
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(backgroundColor)

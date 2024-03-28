@@ -3,105 +3,126 @@ import SwiftUI
 struct ArtifactViewController: View {
     @ObservedObject var viewModel = ArtifactsViewModel()
     @State private var isShowingCreateArtifactView = false
-    @State private var artifacts: [ArtifactsData] = [] // Array to store real artifacts
-    @State private var selectedTab: ArtifactTab = .notBidded
+    @State private var selectedTab: ArtifactTab = .drafts
     @EnvironmentObject var userAuthManager: UserManager
-    @State private var isLoading = false // Add loading state
+    @State private var artifacts: [ArtifactsData] = []
+    @State private var isLoading = false
     
-    // Custom colors for UI elements
-    let infoBoxColor = Color.gray.opacity(0.2)
+    
+    let infoBoxColor = Color(.white)
     let buttonColor = Color(hex: "#5729CE")
     let detailBoxColor = Color(hex: "f4e9dc")
     
-    var actualUserID: String {
-        userAuthManager.userId
-    }
-    
-    // Enum to manage the tabs for artifact categories
+   
     enum ArtifactTab {
-        case bidded, notBidded
+        case drafts, posts
     }
     
     var body: some View {
-        NavigationView {
-            VStack {
-                // Segmented control for switching between bidded and not bidded artifacts
-                Picker("Select Tab", selection: $selectedTab) {
-                    Text("Drafts").tag(ArtifactTab.notBidded)
-                    Text("Posts").tag(ArtifactTab.bidded)
-                }
-                .pickerStyle(SegmentedPickerStyle())
-                .padding()
-                
-                // Scroll view to display artifacts based on selected tab
-                // Scroll view to display artifacts based on selected tab
-                ScrollView {
-                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 20) {
-                        ForEach(artifacts.filter { $0.isBidded == (selectedTab == .bidded) }, id: \.id) { artifact in
-                            if selectedTab == .bidded {
-                                ArtifactSummaryView(viewModel: viewModel, artifact: artifact)
-                                    .padding()
-                                    .background(detailBoxColor)
-                                    .cornerRadius(10)
-                            } else {
-                                ArtifactDraftView(viewModel: viewModel, artifact: artifact)
-                                    .padding()
-                                    .background(detailBoxColor)
-                                    .cornerRadius(10)
+            NavigationView {
+                VStack {
+                    Picker("Select Tab", selection: Binding<ArtifactTab>(
+                        get: { selectedTab },
+                        set: { newValue in
+                            selectedTab = newValue
+                            reloadArtifacts()
+                        }
+                    )) {
+                        Text("Drafts").tag(ArtifactTab.drafts)
+                        Text("Posts").tag(ArtifactTab.posts)
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
+                    .padding()
+
+
+
+                    ScrollView {
+                        if isLoading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle())
+                                .padding()
+                        } else {
+                            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 20) {
+                                ForEach(artifactsForSelectedTab, id: \.id) { artifact in
+                                    if selectedTab == .posts {
+                                        NavigationLink(destination: ArtifactDetailView(viewModel: viewModel, artifact: artifact)) {
+                                            ArtifactSummaryView(viewModel: viewModel, artifact: artifact)
+                                                .padding()
+                                                .background(.white)
+                                                .cornerRadius(10)
+                                        }
+                                    } else {
+                                        NavigationLink(destination: DraftDetailsView(viewModel: viewModel, artifact: artifact)) {
+                                                                                    ArtifactDraftView(viewModel: viewModel, artifact: artifact)
+                                                                                        .background(.white)
+                                                                                        .cornerRadius(10)
+                                        }
+                                    }
+                                }
                             }
+                            .padding()
                         }
                     }
-                    .padding()
+                    .background(infoBoxColor)
                 }
-                .background(infoBoxColor)
+                .navigationBarTitle("My Artifacts", displayMode: .inline)
+                .navigationBarItems(trailing: navigationBarTrailingItem)
+                .sheet(isPresented: $isShowingCreateArtifactView) {
+                    CreateArtifactView(isShowingCreateArtifactView: $isShowingCreateArtifactView, artifactsViewModel: ArtifactsViewModel(), userId: userAuthManager.userId)
+                }
+                .onAppear(perform: loadArtifacts)
+            }
+        }
 
+        private var navigationBarTrailingItem: some View {
+            Button(action: {
+                isShowingCreateArtifactView = true
+            }) {
+                HStack {
+                    Image(systemName: "plus")
+                        .foregroundColor(.white)
+                    Text("New")
+                        .foregroundColor(.white)
+                }
+                .padding(.all, 7)
+                .background(buttonColor)
+                .cornerRadius(10)
             }
-            .navigationBarTitle("My Artifacts", displayMode: .inline)
-            .navigationBarItems(trailing: navigationBarTrailingItem)
-            .sheet(isPresented: $isShowingCreateArtifactView) {
-                // Replace "currentUser" with the actual user ID from Firebase
-                CreateArtifactView(isShowingCreateArtifactView: $isShowingCreateArtifactView, artifactsViewModel: ArtifactsViewModel(), userId: actualUserID)
-            }
-            .onAppear(perform: loadArtifacts) // Load artifacts when view appears
+        }
+
+    private var artifactsForSelectedTab: [ArtifactsData] {
+        switch selectedTab {
+        case .drafts:
+            return artifacts
+        case .posts:
+            return viewModel.artifacts ?? []
         }
     }
-    
-    private var navigationBarTrailingItem: some View {
-        // Button to show the view for creating a new artifact
-        Button(action: {
-            isShowingCreateArtifactView = true
-        }) {
-            HStack {
-                Image(systemName: "plus")
-                    .foregroundColor(.white)
-                Text("New")
-                    .foregroundColor(.white)
+
+        private func loadArtifacts() {
+            isLoading = true
+            let userID = userAuthManager.userId
+
+            if selectedTab == .posts {
+                viewModel.fetchArtifacts(userID: userID) { success in
+                    isLoading = !success
+                }
+            } else {
+                viewModel.fetchDrafts(userID: userID) { success in
+                    isLoading = !success
+                    artifacts = viewModel.drafts ?? []
+                }
             }
-            .padding(.all, 7)
-            .background(buttonColor)
-            .cornerRadius(10)
+        }
+
+        private func reloadArtifacts() {
+            // Reload artifacts when tab selection changes
+            loadArtifacts()
         }
     }
-    
-    private func loadArtifacts() {
-        // Set loading state to true when fetching starts
-        isLoading = true
-        
-        // Fetch artifacts based on selected tab and user ID
-        let userID = actualUserID // Assuming you have the actualUserID property defined
-        
-        if selectedTab == .bidded {
-            viewModel.fetchArtifacts(userID: userID) { success in
-                // Set isLoading based on the success of fetching
-                isLoading = !success
-            }
-        } else {
-            viewModel.fetchDrafts(userID: userID) { success in
-                // Set isLoading based on the success of fetching
-                isLoading = !success
-            }
-        }
-        
-        // No need to set isLoading to false here as it will be set in the completion handler
+struct ArtifactViewController_Previews: PreviewProvider {
+    static var previews: some View {
+        ArtifactViewController()
+            .environmentObject(UserManager()) // Assuming UserManager conforms to ObservableObject
     }
 }

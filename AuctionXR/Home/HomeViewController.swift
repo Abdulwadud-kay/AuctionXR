@@ -5,12 +5,28 @@ struct HomeViewController: View {
     @State private var searchText = ""
     @EnvironmentObject var userAuthManager: UserManager
     @ObservedObject var artifactsViewModel = ArtifactsViewModel()
-    @State private var isLoading = true // Added isLoading state
-    @State private var selectedCategory: String = "All" // Added selectedCategory state
-    @State private var showNoArtifactsText = false // Added state to control displaying "No artifacts available" text
-
+    @State private var isLoading = true
+    @State private var selectedCategory: String = "All"
+    @State private var showNoArtifactsText = false
+    
     let tintColor = Color(hex:"#5729CE")
-
+    
+    var filteredArtifacts: [ArtifactsData] {
+        var artifacts = artifactsViewModel.artifacts ?? []
+        
+        // Filter by search text
+        if !searchText.isEmpty {
+            artifacts = artifacts.filter { $0.title.lowercased().contains(searchText.lowercased()) }
+        }
+        
+        // Filter by category
+        if selectedCategory != "All" {
+            artifacts = artifacts.filter { $0.category == selectedCategory }
+        }
+        
+        return artifacts
+    }
+    
     var body: some View {
         NavigationView{
             VStack(spacing: 0) {
@@ -36,7 +52,7 @@ struct HomeViewController: View {
                                         .frame(width: 30, height: 30)
                                         .clipShape(Circle())
                                 }
-
+                                
                             }
                             .foregroundColor(Color(hex:"#5729CE"))
                         }
@@ -103,7 +119,7 @@ struct HomeViewController: View {
                                 .padding()
                         } else {
                             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 20) {
-                                ForEach(artifactsViewModel.artifacts ?? [], id: \.id) { artifact in
+                                ForEach(filteredArtifacts, id: \.id) { artifact in
                                     NavigationLink(destination: ArtifactDetailView(viewModel: artifactsViewModel, artifact: artifact)) {
                                         ArtifactSummaryView(viewModel: artifactsViewModel, artifact: artifact)
                                     }
@@ -113,6 +129,7 @@ struct HomeViewController: View {
                         }
                     }
                 }
+                
                 .edgesIgnoringSafeArea(.all)
                 // Category section
                 Picker("Select Category", selection: $selectedCategory) {
@@ -127,13 +144,24 @@ struct HomeViewController: View {
             }
             .onAppear {
                 // Fetch artifacts when the view appears
-                artifactsViewModel.fetchAllArtifacts { success in
-                    isLoading = !success // Update isLoading based on fetch success
+                fetchArtifacts()
+            }
+            .onReceive(userAuthManager.loggedInStateChanged) { isLoggedIn in
+                if isLoggedIn {
+                    // Reload artifacts when user logs in
+                    fetchArtifacts()
                 }
             }
         }
     }
-}
+        private func fetchArtifacts() {
+            artifactsViewModel.fetchAllArtifacts { success in
+                isLoading = !success // Update isLoading based on fetch success
+            }
+        }
+    }
+    
+
 
 struct HomeViewController_Previews: PreviewProvider {
     static var previews: some View {

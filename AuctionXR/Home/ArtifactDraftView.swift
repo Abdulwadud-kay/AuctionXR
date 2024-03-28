@@ -27,98 +27,72 @@ struct ArtifactDraftView: View {
     let timer = Timer.publish(every: 900, on: .main, in: .common).autoconnect() // 900 seconds = 15 minutes
     
     var body: some View {
-        NavigationView {
-            VStack {
-                NavigationLink(destination: DraftDetailsView(viewModel: viewModel, artifact: artifact), isActive: $isDetailActive) {
-                    EmptyView()
-                }
-                .hidden()
-                
-                Button(action: {
-                    // Toggle the state to navigate to the details view when any image is tapped
-                    self.isDetailActive.toggle()
-                }) {
-                    if let imageUrlString = artifact.imageUrls?[currentImageIndex],
-                       let imageUrl = URL(string: imageUrlString),
-                       let imageData = try? Data(contentsOf: imageUrl),
-                       let uiImage = UIImage(data: imageData) {
-                        Image(uiImage: uiImage)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: UIScreen.main.bounds.width / 2 - 30, height: 200)
-                            .cornerRadius(10)
-                            .shadow(color: .gray, radius: 4, x: 0, y: 2)
-                    } else {
-                        // Placeholder image or loading indicator
-                        Color.gray
-                            .frame(width: UIScreen.main.bounds.width / 2 - 30, height: 200)
-                            .cornerRadius(10)
-                            .shadow(color: .gray, radius: 4, x: 0, y: 2)
-                    }
-                }
-                .onReceive(timer) { _ in
-                    // Change the current image index every time the timer fires
-                    self.currentImageIndex = (self.currentImageIndex + 1) % (artifact.imageUrls?.count ?? 0)
-                    // Load image data asynchronously
-                    if let imageUrlString = artifact.imageUrls?[currentImageIndex],
-                       let imageUrl = URL(string: imageUrlString) {
-                        self.loadImage(from: imageUrl)
-                    }
-                }
-                
-                Text(artifact.title)
-                    .font(.headline)
-                    .fontWeight(.bold)
-                    .padding(.top, 2)
-                
-                if let currentBid = artifact.currentBid {
-                    Text("Current Bid: $\(currentBid, specifier: "%.2f")")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .padding(.bottom, 2)
-                } else {
-                    Text("Starting Price: $\(artifact.startingPrice, specifier: "%.2f")")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .padding(.bottom, 2)
-                }
-                
-                // Display rating stars
-                RatingStarsView(rating: artifact.rating)
-                    .padding(.all, 10)
+          
+        VStack {
+            if let imageUrlString = artifact.imageUrls?[currentImageIndex],
+               let imageUrl = URL(string: imageUrlString),
+               let imageData = try? Data(contentsOf: imageUrl),
+               let uiImage = UIImage(data: imageData) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .clipped()
+                    .frame(width: 150, height: 150)
                     .cornerRadius(10)
-                    .frame(width: UIScreen.main.bounds.width / 2 - 20)
-            }
-            .gesture(LongPressGesture(minimumDuration: 1.0)
-                        .onEnded { _ in
-                            // Show delete confirmation
-                            self.isDeleteConfirmationShown.toggle()
-                        }
-            )
-            .overlay(
-                VStack {
-                    Spacer()
-                    if isDeleteConfirmationShown {
-                        HStack {
-                            Spacer()
-                            Button(action: {
-                                // Remove the artifact from the draft collection
-                                self.viewModel.removeArtifactFromDrafts(artifactID: artifact.id.uuidString)
+            
+            } else {
+ 
+                Color.gray
+                    .frame(width: 150, height: 150)
+                    .cornerRadius(10)
 
-                                // Dismiss the confirmation
-                                self.isDeleteConfirmationShown.toggle()
-                            }) {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(.black)
-                                    .padding()
-                            }
+            }
+            
+            Text(artifact.title)
+                .font(.title2)
+                .padding(.top, 10)
+                .foregroundColor(.black)
+            
+            Text("Starting Price: $\(artifact.startingPrice, specifier: "%.2f")")
+                .font(.headline)
+                .padding(.top, 2)
+                .foregroundColor(.black)
+            
+            
+            // Display rating stars
+            RatingStarsView(rating: artifact.rating)
+                .padding(.all, 10)
+                .cornerRadius(10)
+                .frame(width: UIScreen.main.bounds.width / 2 - 20)
+        }
+        .gesture(LongPressGesture(minimumDuration: 1.0)
+            .onEnded { _ in
+                // Show delete confirmation
+                self.isDeleteConfirmationShown.toggle()
+            }
+        )
+        .overlay(
+            VStack {
+                Spacer()
+                if isDeleteConfirmationShown {
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            self.viewModel.removeArtifactFromDrafts(artifactID: artifact.id.uuidString)
+                            
+                            // Dismiss the confirmation
+                            self.isDeleteConfirmationShown.toggle()
+                        }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.white)
+                                .padding()
                         }
                     }
                 }
-            )
-        }
+            }
+        )
     }
-    
+      
     private func loadImage(from url: URL) {
         URLSession.shared.dataTask(with: url) { data, _, error in
             if let data = data {
@@ -128,8 +102,8 @@ struct ArtifactDraftView: View {
             }
         }.resume()
     }
-}
 
+}
 
     
 struct ArtifactDraftView_Previews: PreviewProvider {
@@ -148,8 +122,6 @@ struct ArtifactDraftView_Previews: PreviewProvider {
             "startingPrice": 0.0,
             "currentBid": 100.0,
             "isSold": false,
-            "likes": [],
-            "dislikes": [],
             "currentBidder": "",
             "rating": 0.0,
             "isBidded": false,

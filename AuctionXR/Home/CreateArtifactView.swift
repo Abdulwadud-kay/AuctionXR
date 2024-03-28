@@ -27,8 +27,6 @@ struct CreateArtifactView: View {
     
     let defaultCurrentBid: Double? = 0.0
     let defaultIsSold: Bool = false
-    let defaultLikes: [String]? = nil
-    let defaultDislikes: [String]? = nil
     let defaultCurrentBidder: String = ""
     let defaultRating: Double = 0.0
     let defaultIsBidded: Bool = false
@@ -50,6 +48,7 @@ struct CreateArtifactView: View {
                 TextField("Name of Artifact", text: $title)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding(.horizontal)
+                    .shadow(color: .gray, radius: 2, x: 0, y: 2)
                 
                 VStack(alignment: .leading) {
                     Text("Description")
@@ -69,6 +68,7 @@ struct CreateArtifactView: View {
                     .keyboardType(.decimalPad)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding(.horizontal)
+                    .shadow(color: .gray, radius: 2, x: 0, y: 2)
                 VStack(alignment: .leading) {
                     Text("Bid End Date")
                         .font(.headline)
@@ -238,8 +238,6 @@ struct CreateArtifactView: View {
                 "startingPrice": startingPriceDouble,
                 "currentBid": defaultCurrentBid as Any,
                 "isSold": defaultIsSold,
-                "likes": defaultLikes as Any,
-                "dislikes": defaultDislikes as Any,
                 "currentBidder": defaultCurrentBidder,
                 "rating": defaultRating,
                 "isBidded": defaultIsBidded,
@@ -291,8 +289,6 @@ struct CreateArtifactView: View {
                 "startingPrice": startingPriceDouble,
                 "currentBid": defaultCurrentBid as Any,
                 "isSold": defaultIsSold,
-                "likes": defaultLikes as Any,
-                "dislikes": defaultDislikes as Any,
                 "currentBidder": defaultCurrentBidder,
                 "rating": defaultRating,
                 "isBidded": defaultIsBidded,
