@@ -27,7 +27,6 @@ struct ArtifactDraftView: View {
     let timer = Timer.publish(every: 900, on: .main, in: .common).autoconnect() // 900 seconds = 15 minutes
     
     var body: some View {
-          
         VStack {
             if let imageUrlString = artifact.imageUrls?[currentImageIndex],
                let imageUrl = URL(string: imageUrlString),
@@ -39,13 +38,10 @@ struct ArtifactDraftView: View {
                     .clipped()
                     .frame(width: 150, height: 150)
                     .cornerRadius(10)
-            
             } else {
- 
                 Color.gray
                     .frame(width: 150, height: 150)
                     .cornerRadius(10)
-
             }
             
             Text(artifact.title)
@@ -58,12 +54,22 @@ struct ArtifactDraftView: View {
                 .padding(.top, 2)
                 .foregroundColor(.black)
             
-            
             // Display rating stars
             RatingStarsView(rating: artifact.rating)
                 .padding(.all, 10)
                 .cornerRadius(10)
                 .frame(width: UIScreen.main.bounds.width / 2 - 20)
+            
+            // Post button
+            Button(action: {
+                viewModel.postArtifactFromDraft(artifactID: artifact.id.uuidString)
+                            }) {
+                Text("Post")
+                    .foregroundColor(.white)
+                    .padding()
+                    .background(Color(hex: "#5729CE"))     .cornerRadius(10)
+            }
+            .padding(.top, 10)
         }
         .gesture(LongPressGesture(minimumDuration: 1.0)
             .onEnded { _ in
@@ -84,7 +90,7 @@ struct ArtifactDraftView: View {
                             self.isDeleteConfirmationShown.toggle()
                         }) {
                             Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.white)
+                                .foregroundColor(.black)
                                 .padding()
                         }
                     }

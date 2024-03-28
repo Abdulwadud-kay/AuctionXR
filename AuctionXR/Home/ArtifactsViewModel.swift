@@ -164,30 +164,32 @@ class ArtifactsViewModel: ObservableObject {
         }
         
     func updateArtifactWithBidderInfo(artifactID: String, bidderUserID: String, bidAmount: Double) {
-            let db = Firestore.firestore()
-            let artifactRef = db.collection("posts").document(artifactID)
-            
-            // Get the username associated with the bidder's user ID
-            getUsernameFromUserID(userID: bidderUserID) { username in
-                if let username = username {
-                    // Update the artifact document with the bidder's username and bid amount
-                    let data: [String: Any] = [
-                        "bidderUsername": username,
-                        "currentBid": bidAmount
-                    ]
-                    artifactRef.updateData(data) { error in
-                        if let error = error {
-                            print("Error updating artifact document with bidder's info: \(error.localizedDescription)")
-                        } else {
-                            print("Artifact document updated successfully with bidder's info")
-                        }
+        let db = Firestore.firestore()
+        
+        // Construct the document reference with the nested path
+        let artifactRef = db.collection("users").document(bidderUserID).collection("posts").document(artifactID)
+        
+        // Get the username associated with the bidder's user ID
+        getUsernameFromUserID(userID: bidderUserID) { username in
+            if let username = username {
+                // Update the artifact document with the bidder's username and bid amount
+                let data: [String: Any] = [
+                    "bidderUsername": username,
+                    "currentBid": bidAmount
+                ]
+                artifactRef.updateData(data) { error in
+                    if let error = error {
+                        print("Error updating artifact document with bidder's info: \(error.localizedDescription)")
+                    } else {
+                        print("Artifact document updated successfully with bidder's info")
                     }
-                } else {
-                    print("Failed to retrieve bidder's username.")
                 }
+            } else {
+                print("Failed to retrieve bidder's username.")
             }
         }
-        
+    }
+
         // Function to get the username associated with a user ID
         private func getUsernameFromUserID(userID: String, completion: @escaping (String?) -> Void) {
             let db = Firestore.firestore()
@@ -208,6 +210,48 @@ class ArtifactsViewModel: ObservableObject {
                 }
             }
         }
+    func postArtifactFromDraft(artifactID: String) {
+        guard let currentUser = Auth.auth().currentUser else {
+            print("User is not logged in")
+            return
+        }
+        
+        let db = Firestore.firestore()
+        let userRef = db.collection("users").document(currentUser.uid)
+        let draftRef = userRef.collection("drafts").document(artifactID)
+        let postRef = userRef.collection("posts").document(artifactID)
+        
+        draftRef.getDocument { (document, error) in
+            if let document = document, document.exists {
+                guard let artifactData = document.data() else {
+                    print("Artifact data is missing")
+                    return
+                }
+                
+                // Remove the artifact from drafts
+                draftRef.delete { error in
+                    if let error = error {
+                        print("Error deleting artifact from drafts: \(error.localizedDescription)")
+                    } else {
+                        print("Artifact successfully removed from drafts")
+                        
+                        // Post the artifact to the user's posts collection
+                        postRef.setData(artifactData) { error in
+                            if let error = error {
+                                print("Error posting artifact: \(error.localizedDescription)")
+                            } else {
+                                print("Artifact successfully posted")
+                                // Optionally, trigger a reload or update UI here
+                            }
+                        }
+                    }
+                }
+            } else {
+                print("Document does not exist")
+            }
+        }
+    }
+
     }
     
 

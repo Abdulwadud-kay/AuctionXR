@@ -10,7 +10,6 @@ struct NotificationView: View {
         NotificationModel(profileImage: "person.crop.circle", message: "Alex Wilson sent you a message.", time: "1h"),
         NotificationModel(profileImage: "person.crop.circle", message: "Samantha Miller tagged you in a post.", time: "1d"),
         NotificationModel(profileImage: "person.crop.circle", message: "George King liked your comment.", time: "1s"),
-        NotificationModel(profileImage: "person.crop.circle", message: "Lucy Graham shared your story.", time: "1yr"),
         NotificationModel(profileImage: "person.crop.circle", message: "Oliver Scott invited you to an event.", time: "1m")
     ]
     
