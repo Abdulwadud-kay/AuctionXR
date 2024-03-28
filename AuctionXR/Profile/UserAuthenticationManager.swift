@@ -50,14 +50,13 @@ class UserManager: ObservableObject {
                 }
                 return
             }
-            if let username = document.get("username") as? String,
-               let profileImageURL = document.get("profileImageURL") as? String { // Fetch profile image URL
+            if let username = document.get("username") as? String {
                 DispatchQueue.main.async {
-                    self.handleUserFound(userId: user.uid, email: user.email ?? "", username: username, profileImageURL: profileImageURL)
+                    self.handleUserFound(userId: user.uid, email: user.email ?? "", username: username)
                 }
             } else {
-                print("Username or profile image URL not found in user details")
-                // Handle missing username or profile image URL gracefully
+                print("Username not found in user details")
+                // Handle missing username gracefully
             }
         }
     }
@@ -72,11 +71,10 @@ class UserManager: ObservableObject {
         self.appState = .loggedIn
     }
 
-    private func handleUserFound(userId: String, email: String, username: String, profileImageURL: String) {
+    private func handleUserFound(userId: String, email: String, username: String) {
         self.userId = userId
         self.userEmail = email
         self.username = username
-        self.userImageURL = profileImageURL // Store the profile image URL
         self.isLoggedIn = true
         self.appState = .loggedIn
     }

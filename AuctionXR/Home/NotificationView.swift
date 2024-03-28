@@ -42,7 +42,7 @@ struct NotificationView: View {
     
 
            .navigationBarTitle("Notifications", displayMode: .inline)
-                .padding(.bottom, 300)
+                .padding(.bottom, 20)
             }
     }
 }

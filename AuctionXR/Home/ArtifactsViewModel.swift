@@ -26,18 +26,8 @@ class ArtifactsViewModel: ObservableObject {
         // Access Firestore reference
         let db = Firestore.firestore()
         
-        // Get the current user's ID
-        guard let currentUserID = Auth.auth().currentUser?.uid else {
-            print("User is not logged in")
-            completion(false)
-            return
-        }
-        
-        // Access the "users" collection and then the specific user's document
-        let userDocRef = db.collection("users").document(currentUserID)
-        
-        // Fetch all documents from the "posts" subcollection of the user's document
-        userDocRef.collection("posts").getDocuments { [weak self] (snapshot, error) in
+        // Fetch all documents from the "posts" subcollection of all users
+        db.collectionGroup("posts").getDocuments { [weak self] (snapshot, error) in
             guard let self = self else { return }
             
             if let error = error {
@@ -70,6 +60,7 @@ class ArtifactsViewModel: ObservableObject {
             completion(true)
         }
     }
+
 
     
     func fetchArtifacts(userID: String, completion: @escaping (Bool) -> Void) {
@@ -172,68 +163,52 @@ class ArtifactsViewModel: ObservableObject {
             self.artifacts = artifacts
         }
         
-    func updateFirebaseDatabaseWithBid(artifactID: String, bidAmount: Double, bidderUsername: String) {
-        let db = Firestore.firestore()
-        let artifactRef = db.collection("posts").document(artifactID)
-        
-        artifactRef.getDocument { (document, error) in
-            if let document = document, document.exists {
-                var data = document.data() ?? [:]
-                if let currentBid = data["currentBid"] as? Double {
-                    // Check if the new bid amount is higher than the current bid
-                    if bidAmount > currentBid {
-                        // Update current bid and bidder fields
-                        data["currentBid"] = bidAmount
-                        data["currentBidder"] = bidderUsername
+    func updateArtifactWithBidderInfo(artifactID: String, bidderUserID: String, bidAmount: Double) {
+            let db = Firestore.firestore()
+            let artifactRef = db.collection("posts").document(artifactID)
+            
+            // Get the username associated with the bidder's user ID
+            getUsernameFromUserID(userID: bidderUserID) { username in
+                if let username = username {
+                    // Update the artifact document with the bidder's username and bid amount
+                    let data: [String: Any] = [
+                        "bidderUsername": username,
+                        "currentBid": bidAmount
+                    ]
+                    artifactRef.updateData(data) { error in
+                        if let error = error {
+                            print("Error updating artifact document with bidder's info: \(error.localizedDescription)")
+                        } else {
+                            print("Artifact document updated successfully with bidder's info")
+                        }
                     }
                 } else {
-                    // Initialize current bid and bidder fields
-                    data["currentBid"] = bidAmount
-                    data["currentBidder"] = bidderUsername
+                    print("Failed to retrieve bidder's username.")
                 }
-                
-                // Update the artifact document with the new bid information
-                artifactRef.setData(data) { error in
-                    if let error = error {
-                        print("Error updating artifact document: \(error.localizedDescription)")
-                    } else {
-                        print("Artifact document updated successfully with bid information")
-                    }
-                }
-            } else {
-                print("Document does not exist")
             }
         }
-    }
-    func getUsernameFromUserID(userID: String, completion: @escaping (String?) -> Void) {
-        if let currentUser = Auth.auth().currentUser {
-            // If the current user is available, check if it matches the requested userID
-            if currentUser.uid == userID {
-                // If the userID matches the current user's ID, return the current user's display name
-                completion(currentUser.displayName)
-            } else {
-                // If the requested userID is different, query the Firestore users collection to get the username
-                let db = Firestore.firestore()
-                let userRef = db.collection("users").document(userID)
-                
-                userRef.getDocument { document, error in
-                    if let document = document, document.exists {
-                        if let username = document.data()?["username"] as? String {
-                            // Username found in Firestore, return it
-                            completion(username)
-                        } else {
-                            // Username not found in Firestore
-                            completion(nil)
-                        }
+        
+        // Function to get the username associated with a user ID
+        private func getUsernameFromUserID(userID: String, completion: @escaping (String?) -> Void) {
+            let db = Firestore.firestore()
+            let userRef = db.collection("users").document(userID)
+            
+            userRef.getDocument { document, error in
+                if let document = document, document.exists {
+                    if let username = document.data()?["username"] as? String {
+                        // Username found in Firestore, return it
+                        completion(username)
                     } else {
-                        // Document not found in Firestore
+                        // Username not found in Firestore
                         completion(nil)
                     }
+                } else {
+                    // Document not found in Firestore
+                    completion(nil)
                 }
             }
-        } else {
-            // If no user is signed in, return nil
-            completion(nil)
         }
     }
-}
+    
+
+

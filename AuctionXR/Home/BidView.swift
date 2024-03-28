@@ -24,6 +24,7 @@ struct BidView: View {
                     RoundedRectangle(cornerRadius: 10)
                         .foregroundColor(Color.white)
                         .shadow(color: Color.gray.opacity(0.5), radius: 3, x: 0, y: 2)
+                        .frame(maxHeight: 30)
                     
                     VStack {
                         HStack {
@@ -38,7 +39,7 @@ struct BidView: View {
                                 .fixedSize(horizontal: false, vertical: true) // Allow the text to wrap
                         }
                         .padding(.bottom, 5) // Reduce bottom padding
-                        .frame(maxWidth: 390)
+                       
                     }
                     .padding(.horizontal, 20)
                 }
@@ -49,6 +50,7 @@ struct BidView: View {
                     RoundedRectangle(cornerRadius: 10)
                         .foregroundColor(Color.white)
                         .shadow(color: Color.gray.opacity(0.5), radius: 3, x: 0, y: 2)
+                        .frame(maxHeight: 30)
                     
                     VStack {
                         HStack {
@@ -62,7 +64,7 @@ struct BidView: View {
                                 .padding(.horizontal, 10)
                         }
                         .padding(.bottom, 5) // Reduce bottom padding
-                        .frame(maxWidth: 390)
+                        
                     }
                     .padding(.horizontal, 20)
                 }
@@ -74,6 +76,7 @@ struct BidView: View {
                         RoundedRectangle(cornerRadius: 10)
                             .foregroundColor(Color.white)
                             .shadow(color: Color.gray.opacity(0.5), radius: 3, x: 0, y: 2)
+                            .frame(maxHeight: 30)
                         
                         VStack {
                             HStack {
@@ -87,7 +90,7 @@ struct BidView: View {
                                     .padding(.horizontal, 10)
                             }
                             .padding(.bottom, 5) // Reduce bottom padding
-                            .frame(maxWidth: 390)
+                           
                         }
                         .padding(.horizontal, 20)
                     }
@@ -100,6 +103,7 @@ struct BidView: View {
                         RoundedRectangle(cornerRadius: 10)
                             .foregroundColor(Color.white)
                             .shadow(color: Color.gray.opacity(0.5), radius: 3, x: 0, y: 2)
+                            .frame(maxHeight: 30)
                         
                         VStack {
                             HStack {
@@ -113,7 +117,7 @@ struct BidView: View {
                                     .padding(.horizontal, 10)
                             }
                             .padding(.bottom, 5) // Reduce bottom padding
-                            .frame(maxWidth:390)
+                            
                         }
                         .padding(.horizontal, 20)
                     }
@@ -145,32 +149,20 @@ struct BidView: View {
                     
                     Spacer() // Add spacer to push the bid button to the trailing side
                     
-                    // Bid button
                     Button(action: {
                         if let currentUser = Auth.auth().currentUser {
                             let bidderUserID = currentUser.uid
-                            viewModel.getUsernameFromUserID(userID: bidderUserID) { username in
-                                if let username = username {
-                                    // If username is available, proceed with updating Firebase
-                                    viewModel.updateFirebaseDatabaseWithBid(artifactID: artifact.id.uuidString, bidAmount: bidAmount, bidderUsername: username)
-                                } else {
-                                    // Handle case where username is not available
-                                    print("Failed to retrieve bidder's username.")
-                                    isShowingAlert = false // Dismiss alert
-                                  
-                                }
-                            }
+                            viewModel.updateArtifactWithBidderInfo(artifactID: artifact.id.uuidString, bidderUserID: bidderUserID, bidAmount: bidAmount)
                         } else {
                             print("No user signed in.")
-                            
                         }
-                      
                     }) {
                         Text("Bid")
                             .foregroundColor(.white)
                             .padding()
                             .background(Color.green)
                             .cornerRadius(10)
+                    }
                             .onTapGesture {
                                 self.presentationMode.wrappedValue.dismiss()
                             }
@@ -181,9 +173,10 @@ struct BidView: View {
                     }
                     .padding(.horizontal, 20)
                     .padding(.bottom, 20)
+                    
                 }
-                .padding(.horizontal, 20)
+                
             }
         }
     }
-}
+

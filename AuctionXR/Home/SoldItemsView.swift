@@ -17,7 +17,7 @@ struct SoldItemsView: View {
             if viewModel.selectedSegment == 0 {
                 BidsListView(viewModel: viewModel)
             } else {
-                MyArtifactsListView(viewModel: viewModel)
+                AuctionWinView()
             }
 
             Spacer()
@@ -48,22 +48,38 @@ struct BidsListView: View {
     }
 }
 
-struct MyArtifactsListView: View {
-    @ObservedObject var viewModel: ArtifactsViewModel
-    @EnvironmentObject var userAuthManager: UserManager
+struct AuctionWinView: View {
+    let wonItems = [
+        WonItem(name: "Vintage Camera", amountPaid: "$250", deliveryDate: "April 30, 2023", authenticityGuarantee: "Certified Authentic with 2 years warranty", deliveryLocation: "123 Vintage Lane, Oldtown"),
+        WonItem(name: "Antique Watch", amountPaid: "$400", deliveryDate: "May 5, 2023", authenticityGuarantee: "Verified by Expert Watchmakers with lifetime authenticity guarantee", deliveryLocation: "456 Collector's St., Timetown"),
+        WonItem(name: "Rare Book Collection", amountPaid: "$150", deliveryDate: "April 28, 2023", authenticityGuarantee: "Includes certificate of authenticity from renowned book appraiser", deliveryLocation: "789 Bibliophile Blvd., Readville")
+    ]
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 10) {
-                if let artifacts = viewModel.artifacts, !artifacts.isEmpty {
-                    ForEach(artifacts.filter { $0.currentBidder == userAuthManager.userId }, id: \.id) { artifact in
-                        CurrentArtifactView(viewModel: viewModel, artifact: artifact)
-                    }
-                } else {
-                    PlaceholderView(text: "No Artifacts")
+        List(wonItems) { item in
+            DisclosureGroup {
+                VStack(alignment: .leading) {
+                    Text("Amount Paid: \(item.amountPaid)")
+                        .padding(.bottom, 2)
+                    Text("Delivery Date: \(item.deliveryDate)")
+                        .padding(.bottom, 2)
+                    Text("Authenticity: \(item.authenticityGuarantee)")
+                        .padding(.bottom, 2)
+                    Text("Delivery Location: \(item.deliveryLocation)")
                 }
+                .padding()
+            } label: {
+                Text("Yay! You have won the \(item.name)")
             }
+            .accentColor(.black)
         }
+    }
+}
+
+struct SoldItemsView_Previews: PreviewProvider {
+    static var previews: some View {
+        SoldItemsView()
+            .environmentObject(UserManager())
     }
 }
 
@@ -77,4 +93,13 @@ struct PlaceholderView: View {
             .foregroundColor(.gray)
             .padding()
     }
+}
+
+struct WonItem: Identifiable {
+    let id = UUID()
+    let name: String
+    let amountPaid: String
+    let deliveryDate: String
+    let authenticityGuarantee: String
+    let deliveryLocation: String
 }
